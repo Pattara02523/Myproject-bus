@@ -1,0 +1,1635 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BotestBus - ระบบจองตั๋วรถทัวร์</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Sarabun', sans-serif;
+        }
+
+        /* Loading Animation */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            animation: fadeOut 1s ease-out 3s forwards;
+        }
+
+        .road {
+            width: 80%;
+            height: 8px;
+            background: #333;
+            border-radius: 4px;
+            position: relative;
+            margin-bottom: 40px;
+            overflow: hidden;
+        }
+
+        .road::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: repeating-linear-gradient(
+                to right,
+                white 0px,
+                white 20px,
+                transparent 20px,
+                transparent 40px
+            );
+            transform: translateY(-50%);
+        }
+
+        .bus {
+            width: 60px;
+            height: 30px;
+            background: #3b82f6;
+            border-radius: 8px;
+            position: relative;
+            animation: busMove 3s ease-in-out infinite;
+            margin-bottom: 20px;
+        }
+
+        .bus::before {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 8px;
+            width: 8px;
+            height: 8px;
+            background: #333;
+            border-radius: 50%;
+            box-shadow: 36px 0 0 #333;
+        }
+
+        .bus::after {
+            content: '';
+            position: absolute;
+            top: 6px;
+            left: 8px;
+            width: 44px;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+        }
+
+        @keyframes busMove {
+            0% {
+                transform: translateX(-100px);
+            }
+            50% {
+                transform: translateX(calc(80vw - 60px));
+            }
+            100% {
+                transform: translateX(-100px);
+            }
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+
+        .loading-text {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-top: 20px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        /* Step Transitions */
+        .step-transition {
+            animation: slideInRight 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .step-transition.slide-out {
+            animation: slideOutLeft 0.6s cubic-bezier(0.55, 0.06, 0.68, 0.19);
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+        }
+
+        @keyframes slideOutLeft {
+            from {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(-50px) scale(0.95);
+            }
+        }
+
+        .step-transition.slide-in-left {
+            animation: slideInLeft 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+        }
+
+        /* Back Button */
+        .back-btn {
+            position: fixed;
+            top: 80px;
+            left: 20px;
+            z-index: 30;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(59, 130, 246, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.4);
+            transform: translateX(-3px);
+        }
+
+        .back-btn:active {
+            transform: translateX(-3px) scale(0.95);
+        }
+
+        .seat {
+            width: 45px;
+            height: 45px;
+            border-radius: 8px;
+            border: 2px solid;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .seat.available {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+            color: #6b7280;
+        }
+
+        .seat.available:hover {
+            background: #e5e7eb;
+            transform: scale(1.05);
+        }
+
+        .seat.selected {
+            background: #3b82f6;
+            border-color: #1d4ed8;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .seat.occupied {
+            background: #ef4444;
+            border-color: #dc2626;
+            color: white;
+            cursor: not-allowed;
+        }
+
+        .custom-modal {
+            backdrop-filter: blur(5px);
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .progress-bar {
+            transition: width 0.5s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .ticket-design {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ticket-design::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></svg>') repeat;
+            background-size: 20px 20px;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="text-center mb-8">
+            <svg class="w-20 h-20 mx-auto mb-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M4 6h16v2H4zm0 5h16v6H4zm2 2h12v2H6z"/>
+            </svg>
+            <h1 class="text-4xl font-bold text-white mb-2">BotestBus</h1>
+            <p class="text-white text-lg opacity-90">ระบบจองตั๋วรถทัวร์</p>
+        </div>
+        
+        <div class="road">
+            <div class="bus"></div>
+        </div>
+        
+        <div class="loading-text">กำลังเตรียมระบบ...</div>
+    </div>
+
+    <!-- Back Button -->
+    <button id="back-btn" class="back-btn w-12 h-12 rounded-full flex items-center justify-center shadow-lg hidden" onclick="goBack()">
+        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+    </button>
+
+    <!-- Progress Bar -->
+    <div class="fixed top-0 left-0 w-full bg-white shadow-sm z-40">
+        <div class="flex justify-between items-center px-4 py-3">
+            <div class="flex items-center space-x-3">
+                <svg class="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M4 6h16v2H4zm0 5h16v6H4zm2 2h12v2H6z"/>
+                </svg>
+                <h1 class="text-xl font-bold text-gray-800">BotestBus</h1>
+            </div>
+            <div class="text-sm text-gray-600">
+                ขั้นตอน <span id="current-step-display">1</span> จาก 11
+            </div>
+        </div>
+        <div class="w-full bg-gray-200 h-1">
+            <div id="progress-bar" class="progress-bar bg-blue-600 h-1" style="width: 9.09%"></div>
+        </div>
+    </div>
+
+    <!-- Custom Modal -->
+    <div id="custom-modal" class="fixed inset-0 bg-black bg-opacity-50 custom-modal hidden z-50 flex items-center justify-center">
+        <div class="bg-white rounded-2xl p-6 max-w-md mx-4 shadow-2xl">
+            <div id="modal-content"></div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="pt-20 pb-8">
+        <!-- Step 1: เลือกโซนต้นทาง -->
+        <div id="step1" class="step-container">
+            <div class="max-w-2xl mx-auto px-4">
+                <div class="bg-white rounded-2xl shadow-xl p-8 step-transition">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">เลือกโซนต้นทาง</h2>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button onclick="selectOriginZone('north')" class="zone-btn p-6 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all">
+                            <div class="text-4xl mb-2">🏔️</div>
+                            <div class="font-semibold">ภาคเหนือ</div>
+                        </button>
+                        <button onclick="selectOriginZone('central')" class="zone-btn p-6 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all">
+                            <div class="text-4xl mb-2">🏙️</div>
+                            <div class="font-semibold">ภาคกลาง</div>
+                        </button>
+                        <button onclick="selectOriginZone('northeast')" class="zone-btn p-6 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all">
+                            <div class="text-4xl mb-2">🌾</div>
+                            <div class="font-semibold">ภาคอีสาน</div>
+                        </button>
+                        <button onclick="selectOriginZone('south')" class="zone-btn p-6 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all">
+                            <div class="text-4xl mb-2">🏖️</div>
+                            <div class="font-semibold">ภาคใต้</div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: เลือกจุดขึ้นรถ -->
+        <div id="step2" class="step-container hidden">
+            <div class="max-w-2xl mx-auto px-4">
+                <div class="bg-white rounded-2xl shadow-xl p-8 step-transition">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">เลือกจุดขึ้นรถ</h2>
+                    <div class="space-y-3">
+                        <button onclick="selectPickupPoint('mochit')" class="w-full p-4 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all text-left">
+                            <div class="flex items-center">
+                                <div class="text-2xl mr-4">🚌</div>
+                                <div>
+                                    <div class="font-semibold">สถานีขนส่งหมอชิต</div>
+                                    <div class="text-sm text-gray-600">กรุงเทพมหานคร</div>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: เลือกโซนปลายทาง -->
+        <div id="step3" class="step-container hidden">
+            <div class="max-w-2xl mx-auto px-4">
+                <div class="bg-white rounded-2xl shadow-xl p-8 step-transition">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">เลือกโซนปลายทาง</h2>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button onclick="selectDestinationZone('north')" class="zone-btn p-6 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all">
+                            <div class="text-4xl mb-2">🏔️</div>
+                            <div class="font-semibold">ภาคเหนือ</div>
+                        </button>
+                        <button onclick="selectDestinationZone('central')" class="zone-btn p-6 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all">
+                            <div class="text-4xl mb-2">🏙️</div>
+                            <div class="font-semibold">ภาคกลาง</div>
+                        </button>
+                        <button onclick="selectDestinationZone('northeast')" class="zone-btn p-6 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all">
+                            <div class="text-4xl mb-2">🌾</div>
+                            <div class="font-semibold">ภาคอีสาน</div>
+                        </button>
+                        <button onclick="selectDestinationZone('south')" class="zone-btn p-6 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all">
+                            <div class="text-4xl mb-2">🏖️</div>
+                            <div class="font-semibold">ภาคใต้</div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 4: เลือกจังหวัดปลายทาง -->
+        <div id="step4" class="step-container hidden">
+            <div class="max-w-2xl mx-auto px-4">
+                <div class="bg-white rounded-2xl shadow-xl p-8 step-transition">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">เลือกจังหวัดปลายทาง</h2>
+                    <div id="province-list" class="space-y-3 max-h-96 overflow-y-auto">
+                        <!-- จังหวัดจะถูกเพิ่มที่นี่ -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 5: เลือกประเภทตั๋ว -->
+        <div id="step5" class="step-container hidden">
+            <div class="max-w-2xl mx-auto px-4">
+                <div class="bg-white rounded-2xl shadow-xl p-8 step-transition">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">เลือกประเภทตั๋ว</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <button onclick="selectTicketType('oneway')" class="p-6 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all">
+                            <div class="text-4xl mb-2">➡️</div>
+                            <div class="font-semibold mb-2">เที่ยวเดียว</div>
+                            <div class="text-sm text-gray-600">เดินทางไปเพียงทิศทางเดียว</div>
+                        </button>
+                        <button onclick="selectTicketType('roundtrip')" class="p-6 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all">
+                            <div class="text-4xl mb-2">🔄</div>
+                            <div class="font-semibold mb-2">ไป-กลับ</div>
+                            <div class="text-sm text-gray-600">เดินทางไปและกลับ</div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 6: เลือกวันเดินทาง -->
+        <div id="step6" class="step-container hidden">
+            <div class="max-w-2xl mx-auto px-4">
+                <div class="bg-white rounded-2xl shadow-xl p-8 step-transition">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">เลือกวันเดินทาง</h2>
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-3">วันที่เดินทางไป</label>
+                            <input type="date" id="departure-date" class="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors text-lg">
+                        </div>
+                        <div id="return-date-section" class="hidden">
+                            <label class="block text-sm font-semibold text-gray-700 mb-3">วันที่เดินทางกลับ</label>
+                            <input type="date" id="return-date" class="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors text-lg">
+                        </div>
+                    </div>
+                    <div class="mt-8 flex justify-center">
+                        <button onclick="nextStep()" class="btn-primary text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg">
+                            ดำเนินการต่อ
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 7: เลือกเวลาและจำนวนผู้โดยสาร -->
+        <div id="step7" class="step-container hidden">
+            <div class="max-w-3xl mx-auto px-4">
+                <div class="bg-white rounded-2xl shadow-xl p-8 step-transition">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">เลือกเวลาและจำนวนผู้โดยสาร</h2>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-lg font-semibold mb-4">เลือกเวลาเดินทาง</h3>
+                            <div id="time-slots" class="space-y-3">
+                                <!-- เวลาจะถูกเพิ่มที่นี่ -->
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-lg font-semibold mb-4">จำนวนผู้โดยสาร</h3>
+                            <div class="flex items-center space-x-4">
+                                <button onclick="changePassengerCount(-1)" class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 transition-colors">
+                                    <span class="text-xl font-bold">-</span>
+                                </button>
+                                <div class="text-2xl font-bold px-6 py-2 bg-blue-50 rounded-lg min-w-16 text-center" id="passenger-count">1</div>
+                                <button onclick="changePassengerCount(1)" class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 transition-colors">
+                                    <span class="text-xl font-bold">+</span>
+                                </button>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-2">สูงสุด 4 คน</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 flex justify-center">
+                        <button onclick="nextStep()" id="continue-step7" class="btn-primary text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg opacity-50 cursor-not-allowed" disabled>
+                            ดำเนินการต่อ
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 8: เลือกที่นั่ง -->
+        <div id="step8" class="step-container hidden">
+            <div class="max-w-4xl mx-auto px-4">
+                <div class="bg-white rounded-2xl shadow-xl p-8 step-transition">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">เลือกที่นั่ง</h2>
+                    <p class="text-center text-gray-600 mb-6">เลือก <span id="required-seats">1</span> ที่นั่ง | ที่นั่งที่เลือก: <span id="selected-seats-display" class="font-semibold text-blue-600">ไม่มี</span></p>
+                    
+                    <div class="bg-gradient-to-b from-gray-100 to-gray-200 p-8 rounded-2xl border-2 border-gray-300 mb-6 max-w-md mx-auto">
+                        <!-- Driver Area -->
+                        <div class="text-center mb-6">
+                            <div class="inline-block bg-gray-800 text-white px-6 py-3 rounded-lg text-sm font-semibold shadow-lg">
+                                🚗 คนขับ
+                            </div>
+                        </div>
+                        
+                        <!-- Zone Labels -->
+                        <div class="text-center mb-4">
+                            <div class="inline-block bg-blue-100 text-blue-800 px-4 py-2 rounded-lg text-sm font-semibold">
+                                🎯 ที่นั่งทั้งหมด (1-30)
+                            </div>
+                        </div>
+                        
+                        <!-- All Seats -->
+                        <div id="front-seats" class="mb-8">
+                            <!-- All seats will be generated here -->
+                        </div>
+                        
+                        <!-- Hidden back seats section -->
+                        <div id="back-seats" class="hidden">
+                            <!-- Not used -->
+                        </div>
+                    </div>
+
+                    <div class="flex justify-center items-center flex-wrap gap-6 mb-6 text-sm">
+                        <div class="flex items-center">
+                            <div class="seat available w-6 h-6 mr-2"></div>
+                            <span>ว่าง</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="seat selected w-6 h-6 mr-2"></div>
+                            <span>ที่เลือก</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="seat occupied w-6 h-6 mr-2"></div>
+                            <span>ไม่ว่าง</span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-center">
+                        <button onclick="nextStep()" id="confirm-seats-btn" class="btn-primary text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg opacity-50 cursor-not-allowed" disabled>
+                            ยืนยันที่นั่ง
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 9: กรอกข้อมูลผู้โดยสาร -->
+        <div id="step9" class="step-container hidden">
+            <div class="max-w-4xl mx-auto px-4">
+                <div class="bg-white rounded-2xl shadow-xl p-8 step-transition">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">ข้อมูลผู้โดยสาร</h2>
+                    
+                    <div id="passenger-forms" class="space-y-6">
+                        <!-- ฟอร์มผู้โดยสารจะถูกสร้างที่นี่ -->
+                    </div>
+
+                    <div class="mt-8 flex justify-center">
+                        <button onclick="nextStep()" class="btn-primary text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg">
+                            ดำเนินการต่อ
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 10: ชำระเงิน -->
+        <div id="step10" class="step-container hidden">
+            <div class="max-w-2xl mx-auto px-4">
+                <div class="bg-white rounded-2xl shadow-xl p-8 step-transition">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">ชำระเงิน</h2>
+                    
+                    <div class="text-center mb-6">
+                        <div class="text-3xl font-bold text-green-600 mb-2" id="total-amount">฿0</div>
+                        <p class="text-gray-600">ยอดรวมทั้งหมด</p>
+                    </div>
+
+                    <div class="bg-gray-50 rounded-xl p-6 mb-6">
+                        <h3 class="text-lg font-semibold mb-4 text-center">สแกน QR Code เพื่อชำระเงิน</h3>
+                        <div class="flex justify-center mb-4">
+                            <img src="https://png.pngtree.com/png-clipart/20190903/original/pngtree-cartoon-green-environmental-qr-code-design-png-image_4429145.jpg" 
+                                 alt="QR Code" class="w-48 h-48 rounded-lg border">
+                        </div>
+                        <p class="text-sm text-gray-600 text-center">สแกนด้วยแอปธนาคารของคุณ</p>
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">อัปโหลดสลิปการโอนเงิน</label>
+                        <input type="file" id="payment-slip" accept="image/*" class="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors">
+                    </div>
+
+                    <div class="flex justify-center">
+                        <button onclick="confirmPayment()" id="confirm-payment-btn" class="btn-primary text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg opacity-50 cursor-not-allowed" disabled>
+                            ยืนยันการชำระเงิน
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 11: การจองสำเร็จ -->
+        <div id="step11" class="step-container hidden">
+            <div class="max-w-4xl mx-auto px-4">
+                <div class="bg-white rounded-2xl shadow-2xl overflow-hidden step-transition">
+                    <!-- Success Header -->
+                    <div class="bg-gradient-to-r from-emerald-600 to-teal-700 p-8 text-center text-white relative overflow-hidden">
+                        <div class="absolute inset-0 bg-black bg-opacity-10"></div>
+                        <div class="relative z-10">
+                            <div class="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                            </div>
+                            <h2 class="text-3xl font-bold mb-2">การจองสำเร็จ!</h2>
+                            <p class="text-lg opacity-90">ขอบคุณที่ใช้บริการ BotestBus</p>
+                        </div>
+                    </div>
+
+                    <!-- Official Ticket Design -->
+                    <div id="ticket-content" class="relative bg-white">
+                        <!-- Company Header -->
+                        <div class="bg-gradient-to-r from-slate-800 to-slate-900 p-6 text-white">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-16 h-16 bg-blue-600 rounded-lg flex items-center justify-center">
+                                        <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M4 6h16v2H4zm0 5h16v6H4zm2 2h12v2H6z"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-2xl font-bold">BotestBus Co., Ltd.</h3>
+                                        <p class="text-sm opacity-80">บริษัท โบเทสบัส จำกัด</p>
+                                        <p class="text-xs opacity-70">ใบจองตั๋วรถทัวร์อิเล็กทรอนิกส์</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-xs opacity-80 mb-1">หมายเลขการจอง</div>
+                                    <div class="text-2xl font-bold tracking-wider" id="booking-number">BUS001234</div>
+                                    <div class="text-xs opacity-80 mt-1">Booking Reference</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ticket Body -->
+                        <div class="p-8">
+                            <!-- Trip Summary -->
+                            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-8 border border-blue-200">
+                                <h4 class="text-xl font-bold text-gray-800 mb-4 text-center">รายละเอียดการเดินทาง</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div class="text-center">
+                                        <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            </svg>
+                                        </div>
+                                        <div class="text-sm text-gray-600 mb-1">เส้นทาง</div>
+                                        <div class="font-bold text-gray-800" id="route-display">กรุงเทพฯ → เชียงใหม่</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4h3a1 1 0 011 1v8a1 1 0 01-1 1H5a1 1 0 01-1-1V8a1 1 0 011-1h3z"/>
+                                            </svg>
+                                        </div>
+                                        <div class="text-sm text-gray-600 mb-1">วันที่เดินทาง</div>
+                                        <div class="font-bold text-gray-800" id="travel-date-display">25 ธ.ค. 2567</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="w-12 h-12 bg-orange-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                        </div>
+                                        <div class="text-sm text-gray-600 mb-1">เวลาออกเดินทาง</div>
+                                        <div class="font-bold text-gray-800" id="travel-time-display">08:30</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Passenger Information -->
+                            <div class="mb-8">
+                                <h4 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                                    <svg class="w-6 h-6 mr-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                                    </svg>
+                                    รายชื่อผู้โดยสาร
+                                </h4>
+                                <div id="passengers-display" class="space-y-4">
+                                    <!-- ข้อมูลผู้โดยสารจะแสดงที่นี่ -->
+                                </div>
+                            </div>
+
+                            <!-- Seat Information -->
+                            <div class="bg-gray-50 rounded-xl p-6 mb-8">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <div class="text-sm text-gray-600">หมายเลขที่นั่ง</div>
+                                            <div class="text-xl font-bold text-gray-800" id="seats-display">12, 13</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-sm text-gray-600">ยอดรวม</div>
+                                        <div class="text-2xl font-bold text-green-600" id="total-display">฿960</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Booking Details -->
+                            <div class="border-t border-gray-200 pt-6 mb-6">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">วันที่จอง:</span>
+                                        <span class="font-semibold" id="booking-date">20 ธ.ค. 2567</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">สถานะ:</span>
+                                        <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">ยืนยันแล้ว</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">ประเภทตั๋ว:</span>
+                                        <span class="font-semibold" id="ticket-type-display">เที่ยวเดียว</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- QR Code Section -->
+                            <div class="text-center bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-6 border border-gray-200">
+                                <div class="w-32 h-32 bg-white border-2 border-gray-300 rounded-lg mx-auto mb-4 flex items-center justify-center shadow-sm">
+                                    <svg class="w-20 h-20 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M3 3h6v6H3V3zm2 2v2h2V5H5zM3 15h6v6H3v-6zm2 2v2h2v-2H5zM15 3h6v6h-6V3zm2 2v2h2V5h-2zM15 15h2v2h-2v-2zM17 17h2v2h-2v-2zM19 15h2v2h-2v-2zM15 17h2v2h-2v-2zM17 19h2v2h-2v-2zM19 17h2v2h-2v-2z"/>
+                                    </svg>
+                                </div>
+                                <p class="text-sm text-gray-600 font-medium">QR Code สำหรับขึ้นรถ</p>
+                            </div>
+
+                            <!-- Footer -->
+                            <div class="text-center mt-8 pt-6 border-t border-gray-200">
+                                <p class="text-xs text-gray-500 mb-2">
+                                    กรุณาแสดงใบจองนี้เมื่อขึ้นรถ | Please present this booking confirmation when boarding
+                                </p>
+                                <p class="text-xs text-gray-400">
+                                    สอบถามข้อมูลเพิ่มเติม โทร 02-123-4567 | For inquiries, call 02-123-4567
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="bg-gray-50 p-6 border-t">
+                        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                            <button onclick="saveTicketImage()" class="flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                <span>บันทึกตั๋ว</span>
+                            </button>
+                            <button onclick="resetBooking()" class="flex items-center justify-center space-x-2 bg-gray-600 hover:bg-gray-700 text-white px-8 py-3 rounded-xl font-semibold transition-all hover:shadow-lg transform hover:-translate-y-1">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                </svg>
+                                <span>จองใหม่</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = window.__firebase_config || {
+            apiKey: "demo-key",
+            authDomain: "demo.firebaseapp.com",
+            projectId: "demo-project",
+            storageBucket: "demo.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "demo-app-id"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        // Global Variables
+        let currentStep = 1;
+        let bookingData = {
+            originZone: '',
+            pickupPoint: '',
+            destinationZone: '',
+            destinationProvince: '',
+            ticketType: '',
+            departureDate: '',
+            returnDate: '',
+            selectedTime: '',
+            passengerCount: 1,
+            selectedSeats: [],
+            passengerInfo: [],
+            totalAmount: 0
+        };
+
+        let seatListener = null;
+
+        // Province Data
+        const provinces = {
+            north: ['เชียงใหม่', 'เชียงราย', 'ลำปาง', 'ลำพูน', 'แม่ฮ่องสอน', 'น่าน', 'พะเยา', 'แพร่', 'สุโขทัย', 'ตาก', 'อุตรดิตถ์', 'กำแพงเพชร', 'นครสวรรค์', 'พิจิตร', 'พิษณุโลก', 'เพชรบูรณ์', 'เลย', 'หนองคาย', 'อุดรธานี', 'หนองบัวลำภู'],
+            central: ['กรุงเทพมหานคร', 'นนทบุรี', 'ปทุมธานี', 'สมุทรปราการ', 'นครปราการ', 'สมุทรสาคร', 'สมุทรสงคราม', 'ราชบุรี', 'กาญจนบุรี', 'สุพรรณบุรี', 'นครนายก', 'ฉะเชิงเทรา', 'ปราจีนบุรี', 'สระแก้ว', 'จันทบุรี', 'ตราด', 'เพชรบุรี', 'ประจวบคีรีขันธ์'],
+            northeast: ['นครราชสีมา', 'บุรีรัมย์', 'สุรินทร์', 'ศิลาลักษณ์', 'อุบลราชธานี', 'ยโสธร', 'ชัยภูมิ', 'อำนาจเจริญ', 'หนองบัวลำภู', 'ขอนแก่น', 'อุดรธานี', 'เลย', 'หนองคาย', 'บึงกาฬ', 'สกลนคร', 'นครพนม', 'มุกดาหาร', 'ร้อยเอ็ด', 'กาฬสินธุ์', 'มหาสารคาม'],
+            south: ['ชุมพร', 'ระนอง', 'สุราษฎร์ธานี', 'พังงา', 'ภูเก็ต', 'กระบี่', 'นครศรีธรรมราช', 'ตรัง', 'พัทลุง', 'สงขลา', 'สตูล', 'ปัตตานี', 'ยะลา', 'นราธิวาส']
+        };
+
+        // Time slots
+        const timeSlots = [
+            { time: '06:00', price: 450, available: 15 },
+            { time: '08:30', price: 480, available: 12 },
+            { time: '11:00', price: 520, available: 8 },
+            { time: '14:30', price: 500, available: 20 },
+            { time: '17:00', price: 550, available: 6 },
+            { time: '20:30', price: 480, available: 18 },
+            { time: '23:00', price: 450, available: 25 }
+        ];
+
+        // Initialize Authentication
+        async function initAuth() {
+            try {
+                // Use offline mode for demo purposes
+                console.log('Running in demo mode - Firebase authentication skipped');
+                return true;
+            } catch (error) {
+                console.error('Authentication failed:', error);
+                return false;
+            }
+        }
+
+        // Custom Alert Functions
+        function showCustomAlert(message, type = 'info') {
+            const modal = document.getElementById('custom-modal');
+            const content = document.getElementById('modal-content');
+            
+            const icons = {
+                info: 'ℹ️',
+                success: '✅',
+                warning: '⚠️',
+                error: '❌'
+            };
+
+            content.innerHTML = `
+                <div class="text-center">
+                    <div class="text-4xl mb-4">${icons[type]}</div>
+                    <p class="text-lg mb-6">${message}</p>
+                    <button onclick="closeCustomModal()" class="btn-primary text-white px-6 py-2 rounded-lg">
+                        ตกลง
+                    </button>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+        }
+
+        function showCustomConfirm(message, onConfirm) {
+            const modal = document.getElementById('custom-modal');
+            const content = document.getElementById('modal-content');
+            
+            content.innerHTML = `
+                <div class="text-center">
+                    <div class="text-4xl mb-4">❓</div>
+                    <p class="text-lg mb-6">${message}</p>
+                    <div class="flex gap-4 justify-center">
+                        <button onclick="closeCustomModal()" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors">
+                            ยกเลิก
+                        </button>
+                        <button onclick="confirmAction()" class="btn-primary text-white px-6 py-2 rounded-lg">
+                            ยืนยัน
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            window.confirmCallback = onConfirm;
+            modal.classList.remove('hidden');
+        }
+
+        function confirmAction() {
+            if (window.confirmCallback) {
+                window.confirmCallback();
+                window.confirmCallback = null;
+            }
+            closeCustomModal();
+        }
+
+        function closeCustomModal() {
+            document.getElementById('custom-modal').classList.add('hidden');
+        }
+
+        // Step Management
+        let isTransitioning = false;
+
+        function updateProgress() {
+            const progress = (currentStep / 11) * 100;
+            document.getElementById('progress-bar').style.width = progress + '%';
+            document.getElementById('current-step-display').textContent = currentStep;
+            
+            // Show/hide back button
+            const backBtn = document.getElementById('back-btn');
+            if (currentStep > 1) {
+                backBtn.classList.remove('hidden');
+            } else {
+                backBtn.classList.add('hidden');
+            }
+        }
+
+        function showStep(step, direction = 'forward') {
+            if (isTransitioning) return;
+            isTransitioning = true;
+
+            const currentStepElement = document.getElementById(`step${currentStep}`);
+            const targetStepElement = document.getElementById(`step${step}`);
+
+            // Add exit animation to current step
+            if (currentStepElement && !currentStepElement.classList.contains('hidden')) {
+                currentStepElement.classList.add('slide-out');
+                
+                setTimeout(() => {
+                    // Hide all steps
+                    for (let i = 1; i <= 11; i++) {
+                        const stepEl = document.getElementById(`step${i}`);
+                        stepEl.classList.add('hidden');
+                        stepEl.classList.remove('slide-out', 'slide-in-left', 'step-transition');
+                    }
+                    
+                    // Show target step with appropriate animation
+                    if (targetStepElement) {
+                        targetStepElement.classList.remove('hidden');
+                        if (direction === 'backward') {
+                            targetStepElement.classList.add('slide-in-left');
+                        } else {
+                            targetStepElement.classList.add('step-transition');
+                        }
+                    }
+                    
+                    currentStep = step;
+                    updateProgress();
+                    isTransitioning = false;
+                }, 300);
+            } else {
+                // First time showing (no current step)
+                for (let i = 1; i <= 11; i++) {
+                    document.getElementById(`step${i}`).classList.add('hidden');
+                }
+                
+                if (targetStepElement) {
+                    targetStepElement.classList.remove('hidden');
+                    targetStepElement.classList.add('step-transition');
+                }
+                
+                currentStep = step;
+                updateProgress();
+                isTransitioning = false;
+            }
+        }
+
+        function goBack() {
+            if (currentStep > 1 && !isTransitioning) {
+                const previousStep = currentStep - 1;
+                
+                // Clean up seat listener if going back from seat selection
+                if (currentStep === 8 && seatListener) {
+                    seatListener();
+                    seatListener = null;
+                }
+                
+                showStep(previousStep, 'backward');
+                
+                // Re-initialize step if needed
+                setTimeout(() => {
+                    if (previousStep === 4) {
+                        loadProvinces();
+                    } else if (previousStep === 6) {
+                        setupDateInputs();
+                    } else if (previousStep === 7) {
+                        loadTimeSlots();
+                    } else if (previousStep === 8) {
+                        generateSeatMap();
+                        listenToSeatChanges();
+                    } else if (previousStep === 9) {
+                        generatePassengerForms();
+                    } else if (previousStep === 10) {
+                        calculateTotal();
+                        setupPaymentUpload();
+                    }
+                }, 400);
+            }
+        }
+
+        function nextStep() {
+            if (validateCurrentStep()) {
+                currentStep++;
+                if (currentStep <= 11) {
+                    showStep(currentStep);
+                    
+                    // Special handling for certain steps
+                    if (currentStep === 4) {
+                        loadProvinces();
+                    } else if (currentStep === 6) {
+                        setupDateInputs();
+                    } else if (currentStep === 7) {
+                        loadTimeSlots();
+                    } else if (currentStep === 8) {
+                        generateSeatMap();
+                        listenToSeatChanges();
+                    } else if (currentStep === 9) {
+                        generatePassengerForms();
+                    } else if (currentStep === 10) {
+                        calculateTotal();
+                        setupPaymentUpload();
+                    } else if (currentStep === 11) {
+                        generateTicket();
+                    }
+                }
+            }
+        }
+
+        function validateCurrentStep() {
+            switch (currentStep) {
+                case 6:
+                    const departureDate = document.getElementById('departure-date').value;
+                    if (!departureDate) {
+                        showCustomAlert('กรุณาเลือกวันที่เดินทาง', 'warning');
+                        return false;
+                    }
+                    
+                    if (bookingData.ticketType === 'roundtrip') {
+                        const returnDate = document.getElementById('return-date').value;
+                        if (!returnDate) {
+                            showCustomAlert('กรุณาเลือกวันที่เดินทางกลับ', 'warning');
+                            return false;
+                        }
+                        if (new Date(returnDate) <= new Date(departureDate)) {
+                            showCustomAlert('วันที่เดินทางกลับต้องหลังจากวันที่เดินทางไป', 'warning');
+                            return false;
+                        }
+                    }
+                    
+                    bookingData.departureDate = departureDate;
+                    if (bookingData.ticketType === 'roundtrip') {
+                        bookingData.returnDate = document.getElementById('return-date').value;
+                    }
+                    break;
+                    
+                case 7:
+                    if (!bookingData.selectedTime) {
+                        showCustomAlert('กรุณาเลือกเวลาเดินทาง', 'warning');
+                        return false;
+                    }
+                    break;
+                    
+                case 8:
+                    if (bookingData.selectedSeats.length !== bookingData.passengerCount) {
+                        showCustomAlert(`กรุณาเลือกที่นั่ง ${bookingData.passengerCount} ที่`, 'warning');
+                        return false;
+                    }
+                    break;
+                    
+                case 9:
+                    if (!validatePassengerForms()) {
+                        return false;
+                    }
+                    break;
+            }
+            return true;
+        }
+
+        // Step Functions
+        function selectOriginZone(zone) {
+            if (isTransitioning) return;
+            bookingData.originZone = zone;
+            highlightSelection(event.target);
+            setTimeout(() => nextStep(), 600);
+        }
+
+        function selectPickupPoint(point) {
+            if (isTransitioning) return;
+            bookingData.pickupPoint = point;
+            highlightSelection(event.target);
+            setTimeout(() => nextStep(), 600);
+        }
+
+        function selectDestinationZone(zone) {
+            if (isTransitioning) return;
+            bookingData.destinationZone = zone;
+            highlightSelection(event.target);
+            setTimeout(() => nextStep(), 600);
+        }
+
+        function selectProvince(province) {
+            if (isTransitioning) return;
+            bookingData.destinationProvince = province;
+            highlightSelection(event.target);
+            setTimeout(() => nextStep(), 600);
+        }
+
+        function selectTicketType(type) {
+            if (isTransitioning) return;
+            bookingData.ticketType = type;
+            highlightSelection(event.target);
+            setTimeout(() => nextStep(), 600);
+        }
+
+        function highlightSelection(element) {
+            // Remove previous selections
+            element.parentElement.querySelectorAll('.border-blue-500').forEach(el => {
+                el.classList.remove('border-blue-500', 'bg-blue-50');
+            });
+            
+            // Highlight current selection
+            element.classList.add('border-blue-500', 'bg-blue-50');
+        }
+
+        function loadProvinces() {
+            const provinceList = document.getElementById('province-list');
+            const provinceArray = provinces[bookingData.destinationZone] || [];
+            
+            provinceList.innerHTML = provinceArray.map(province => `
+                <button onclick="selectProvince('${province}')" class="w-full p-4 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all text-left">
+                    <div class="font-semibold">${province}</div>
+                </button>
+            `).join('');
+        }
+
+        function setupDateInputs() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('departure-date').setAttribute('min', today);
+            
+            if (bookingData.ticketType === 'roundtrip') {
+                document.getElementById('return-date-section').classList.remove('hidden');
+                document.getElementById('return-date').setAttribute('min', today);
+            }
+        }
+
+        function loadTimeSlots() {
+            const timeSlotsContainer = document.getElementById('time-slots');
+            
+            timeSlotsContainer.innerHTML = timeSlots.map(slot => `
+                <button onclick="selectTimeSlot('${slot.time}', ${slot.price})" class="time-slot w-full p-4 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all text-left">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="font-bold text-lg">${slot.time}</div>
+                            <div class="text-sm text-gray-600">ที่นั่งว่าง: ${slot.available} ที่</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-bold text-green-600">฿${slot.price}</div>
+                            <div class="text-sm text-gray-500">ต่อคน</div>
+                        </div>
+                    </div>
+                </button>
+            `).join('');
+        }
+
+        function selectTimeSlot(time, price) {
+            bookingData.selectedTime = time;
+            bookingData.basePrice = price;
+            
+            // Highlight selection
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                slot.classList.remove('border-blue-500', 'bg-blue-50');
+            });
+            event.target.closest('.time-slot').classList.add('border-blue-500', 'bg-blue-50');
+            
+            // Enable continue button
+            const continueBtn = document.getElementById('continue-step7');
+            continueBtn.disabled = false;
+            continueBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
+        function changePassengerCount(delta) {
+            const newCount = bookingData.passengerCount + delta;
+            if (newCount >= 1 && newCount <= 4) {
+                bookingData.passengerCount = newCount;
+                document.getElementById('passenger-count').textContent = newCount;
+            }
+        }
+
+        // Seat Management
+        async function generateSeatMap() {
+            const frontSeats = document.getElementById('front-seats');
+            const backSeats = document.getElementById('back-seats');
+            
+            document.getElementById('required-seats').textContent = bookingData.passengerCount;
+            
+            // Generate front zone seats (1-15)
+            let frontHTML = '';
+            for (let row = 0; row < 8; row++) {
+                frontHTML += '<div class="flex justify-between items-center mb-3">';
+                
+                // Left side seats (2 seats)
+                const leftSeat1 = (row * 2) + 1;
+                const leftSeat2 = (row * 2) + 2;
+                
+                // Only generate if seat number <= 15
+                if (leftSeat1 <= 15) {
+                    frontHTML += `
+                        <div class="flex space-x-3">
+                            <div class="seat available" data-seat="${leftSeat1}" onclick="toggleSeat(${leftSeat1})">${leftSeat1}</div>
+                            ${leftSeat2 <= 15 ? `<div class="seat available" data-seat="${leftSeat2}" onclick="toggleSeat(${leftSeat2})">${leftSeat2}</div>` : '<div class="w-11"></div>'}
+                        </div>
+                    `;
+                } else {
+                    frontHTML += '<div class="flex space-x-3"><div class="w-11"></div><div class="w-11"></div></div>';
+                }
+                
+                // Aisle space
+                frontHTML += '<div class="w-16 flex items-center justify-center text-xs text-gray-500 font-medium">ทางเดิน</div>';
+                
+                // Right side seats (2 seats)
+                const rightSeat1 = 16 + (row * 2);
+                const rightSeat2 = rightSeat1 + 1;
+                
+                // Only generate if seat number <= 30
+                if (rightSeat1 <= 30) {
+                    frontHTML += `
+                        <div class="flex space-x-3">
+                            <div class="seat available" data-seat="${rightSeat1}" onclick="toggleSeat(${rightSeat1})">${rightSeat1}</div>
+                            ${rightSeat2 <= 30 ? `<div class="seat available" data-seat="${rightSeat2}" onclick="toggleSeat(${rightSeat2})">${rightSeat2}</div>` : '<div class="w-11"></div>'}
+                        </div>
+                    `;
+                } else {
+                    frontHTML += '<div class="flex space-x-3"><div class="w-11"></div><div class="w-11"></div></div>';
+                }
+                
+                frontHTML += '</div>';
+            }
+            
+            frontSeats.innerHTML = frontHTML;
+            
+            // Hide back seats section since we only have 30 seats
+            backSeats.innerHTML = '';
+            
+            // Load occupied seats from Firebase
+            await loadOccupiedSeats();
+        }
+
+        async function loadOccupiedSeats() {
+            try {
+                // Simulate some occupied seats for demo (adjusted for 30 seats)
+                const demoOccupiedSeats = [3, 7, 12, 18, 25, 28];
+                
+                demoOccupiedSeats.forEach(seatNumber => {
+                    const seatElement = document.querySelector(`[data-seat="${seatNumber}"]`);
+                    if (seatElement) {
+                        seatElement.classList.remove('available');
+                        seatElement.classList.add('occupied');
+                    }
+                });
+                
+                console.log('Demo occupied seats loaded');
+            } catch (error) {
+                console.error('Error loading occupied seats:', error);
+            }
+        }
+
+        function listenToSeatChanges() {
+            // Demo mode - no real-time updates needed
+            console.log('Demo mode - real-time seat updates disabled');
+        }
+
+        function toggleSeat(seatNumber) {
+            const seatElement = document.querySelector(`[data-seat="${seatNumber}"]`);
+            
+            if (seatElement.classList.contains('occupied')) {
+                return;
+            }
+
+            const isSelected = seatElement.classList.contains('selected');
+            const maxSeats = bookingData.passengerCount;
+
+            if (isSelected) {
+                seatElement.classList.remove('selected');
+                seatElement.classList.add('available');
+                bookingData.selectedSeats = bookingData.selectedSeats.filter(seat => seat !== seatNumber);
+            } else {
+                if (bookingData.selectedSeats.length < maxSeats) {
+                    seatElement.classList.remove('available');
+                    seatElement.classList.add('selected');
+                    bookingData.selectedSeats.push(seatNumber);
+                } else {
+                    showCustomAlert(`สามารถเลือกได้สูงสุด ${maxSeats} ที่นั่ง`, 'warning');
+                    return;
+                }
+            }
+
+            updateSeatDisplay();
+        }
+
+        function updateSeatDisplay() {
+            const display = document.getElementById('selected-seats-display');
+            const confirmBtn = document.getElementById('confirm-seats-btn');
+            
+            if (bookingData.selectedSeats.length === 0) {
+                display.textContent = 'ไม่มี';
+                display.className = 'font-semibold text-gray-500';
+            } else {
+                display.textContent = bookingData.selectedSeats.sort((a, b) => a - b).join(', ');
+                display.className = 'font-semibold text-blue-600';
+            }
+
+            if (bookingData.selectedSeats.length === bookingData.passengerCount) {
+                confirmBtn.disabled = false;
+                confirmBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                confirmBtn.disabled = true;
+                confirmBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        async function updateSeatsInFirebase() {
+            try {
+                // Demo mode - simulate successful seat update
+                console.log('Demo mode - seats updated locally:', bookingData.selectedSeats);
+                
+                // Mark selected seats as occupied in the UI
+                bookingData.selectedSeats.forEach(seatNumber => {
+                    const seatElement = document.querySelector(`[data-seat="${seatNumber}"]`);
+                    if (seatElement) {
+                        seatElement.classList.remove('available', 'selected');
+                        seatElement.classList.add('occupied');
+                    }
+                });
+                
+                return true;
+            } catch (error) {
+                console.error('Error updating seats:', error);
+                return false;
+            }
+        }
+
+        // Passenger Forms
+        function generatePassengerForms() {
+            const formsContainer = document.getElementById('passenger-forms');
+            let formsHTML = '';
+
+            for (let i = 0; i < bookingData.passengerCount; i++) {
+                formsHTML += `
+                    <div class="bg-gray-50 rounded-xl p-6 border">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">ผู้โดยสารคนที่ ${i + 1} (ที่นั่ง ${bookingData.selectedSeats[i]})</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">เลขบัตรประชาชน</label>
+                                <input type="text" id="id-${i}" maxlength="13" class="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors" placeholder="1234567890123" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">เพศ</label>
+                                <select id="gender-${i}" class="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors" required>
+                                    <option value="">เลือกเพศ</option>
+                                    <option value="male">ชาย</option>
+                                    <option value="female">หญิง</option>
+                                    <option value="other">ไม่ระบุ</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">ชื่อ</label>
+                                <input type="text" id="fname-${i}" class="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors" placeholder="ชื่อ" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">นามสกุล</label>
+                                <input type="text" id="lname-${i}" class="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors" placeholder="นามสกุล" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">เบอร์โทรศัพท์</label>
+                                <input type="tel" id="phone-${i}" maxlength="10" pattern="[0-9]{10}" class="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors" placeholder="0812345678" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">อีเมล</label>
+                                <input type="email" id="email-${i}" class="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors" placeholder="example@email.com">
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            formsContainer.innerHTML = formsHTML;
+        }
+
+        function validatePassengerForms() {
+            bookingData.passengerInfo = [];
+            
+            for (let i = 0; i < bookingData.passengerCount; i++) {
+                const idCard = document.getElementById(`id-${i}`).value;
+                const gender = document.getElementById(`gender-${i}`).value;
+                const fname = document.getElementById(`fname-${i}`).value;
+                const lname = document.getElementById(`lname-${i}`).value;
+                const phone = document.getElementById(`phone-${i}`).value;
+                const email = document.getElementById(`email-${i}`).value;
+
+                if (!idCard || !gender || !fname || !lname || !phone) {
+                    showCustomAlert(`กรุณากรอกข้อมูลผู้โดยสารคนที่ ${i + 1} ให้ครบถ้วน`, 'warning');
+                    return false;
+                }
+
+                if (idCard.length !== 13 || !/^\d+$/.test(idCard)) {
+                    showCustomAlert(`เลขบัตรประชาชนของผู้โดยสารคนที่ ${i + 1} ไม่ถูกต้อง`, 'warning');
+                    return false;
+                }
+
+                if (phone.length !== 10 || !/^\d+$/.test(phone)) {
+                    showCustomAlert(`เบอร์โทรศัพท์ของผู้โดยสารคนที่ ${i + 1} ต้องเป็นตัวเลข 10 หลัก`, 'warning');
+                    return false;
+                }
+
+                bookingData.passengerInfo.push({
+                    idCard: idCard,
+                    gender: gender,
+                    firstName: fname,
+                    lastName: lname,
+                    phone: phone,
+                    email: email,
+                    seat: bookingData.selectedSeats[i]
+                });
+            }
+            return true;
+        }
+
+        // Payment
+        function calculateTotal() {
+            const baseAmount = bookingData.basePrice * bookingData.passengerCount;
+            const multiplier = bookingData.ticketType === 'roundtrip' ? 2 : 1;
+            bookingData.totalAmount = baseAmount * multiplier;
+            
+            document.getElementById('total-amount').textContent = `฿${bookingData.totalAmount.toLocaleString()}`;
+        }
+
+        function setupPaymentUpload() {
+            const fileInput = document.getElementById('payment-slip');
+            const confirmBtn = document.getElementById('confirm-payment-btn');
+            
+            fileInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    confirmBtn.disabled = false;
+                    confirmBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                } else {
+                    confirmBtn.disabled = true;
+                    confirmBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                }
+            });
+        }
+
+        async function confirmPayment() {
+            try {
+                // Update seats in Firebase
+                await updateSeatsInFirebase();
+                
+                // Generate booking number
+                bookingData.bookingNumber = 'BUS' + Date.now().toString().substr(-6);
+                bookingData.bookingDate = new Date().toLocaleDateString('th-TH');
+                
+                showCustomAlert('การชำระเงินสำเร็จ!', 'success');
+                setTimeout(() => {
+                    closeCustomModal();
+                    nextStep();
+                }, 2000);
+            } catch (error) {
+                console.error('Payment confirmation error:', error);
+                showCustomAlert('เกิดข้อผิดพลาดในการยืนยันการชำระเงิน', 'error');
+            }
+        }
+
+        // Ticket Generation
+        function generateTicket() {
+            // Set booking details
+            document.getElementById('booking-number').textContent = bookingData.bookingNumber;
+            document.getElementById('booking-date').textContent = bookingData.bookingDate;
+            
+            // Route display
+            const zoneNames = {
+                north: 'ภาคเหนือ',
+                central: 'ภาคกลาง',
+                northeast: 'ภาคอีสาน',
+                south: 'ภาคใต้'
+            };
+            
+            document.getElementById('route-display').textContent = 
+                `หมอชิต → ${bookingData.destinationProvince}`;
+            
+            document.getElementById('travel-date-display').textContent = 
+                new Date(bookingData.departureDate).toLocaleDateString('th-TH');
+            
+            document.getElementById('travel-time-display').textContent = bookingData.selectedTime;
+            document.getElementById('seats-display').textContent = bookingData.selectedSeats.join(', ');
+            
+            // Set total amount and ticket type
+            document.getElementById('total-display').textContent = `฿${bookingData.totalAmount.toLocaleString()}`;
+            document.getElementById('ticket-type-display').textContent = bookingData.ticketType === 'roundtrip' ? 'ไป-กลับ' : 'เที่ยวเดียว';
+            
+            // Passengers display
+            const passengersContainer = document.getElementById('passengers-display');
+            const genderText = {
+                'male': 'ชาย',
+                'female': 'หญิง',
+                'other': 'ไม่ระบุ'
+            };
+            
+            passengersContainer.innerHTML = bookingData.passengerInfo.map((passenger, index) => `
+                <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="text-lg font-bold text-gray-800">${passenger.firstName} ${passenger.lastName}</div>
+                                <div class="text-sm text-gray-600">ผู้โดยสารคนที่ ${index + 1}</div>
+                            </div>
+                        </div>
+                        <div class="bg-purple-100 text-purple-800 px-4 py-2 rounded-full text-sm font-semibold">
+                            ที่นั่ง ${passenger.seat}
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">เลขบัตรประชาชน:</span>
+                            <span class="font-medium">${passenger.idCard.replace(/(\d{1})(\d{4})(\d{5})(\d{2})(\d{1})/, '$1-$2-$3-$4-$5')}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">เพศ:</span>
+                            <span class="font-medium">${genderText[passenger.gender] || passenger.gender}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">เบอร์โทรศัพท์:</span>
+                            <span class="font-medium">${passenger.phone.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3')}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">อีเมล:</span>
+                            <span class="font-medium">${passenger.email || 'ไม่ระบุ'}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function saveTicketImage() {
+            const ticketElement = document.getElementById('ticket-content');
+            
+            html2canvas(ticketElement, {
+                backgroundColor: null,
+                scale: 2,
+                logging: false
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `BotestBus_Ticket_${bookingData.bookingNumber}.png`;
+                link.href = canvas.toDataURL();
+                link.click();
+                
+                showCustomAlert('บันทึกรูปภาพตั๋วสำเร็จ!', 'success');
+            }).catch(error => {
+                console.error('Error saving ticket image:', error);
+                showCustomAlert('เกิดข้อผิดพลาดในการบันทึกรูปภาพ', 'error');
+            });
+        }
+
+        function resetBooking() {
+            showCustomConfirm('คุณต้องการเริ่มการจองใหม่หรือไม่?', () => {
+                // Clean up seat listener
+                if (seatListener) {
+                    seatListener();
+                    seatListener = null;
+                }
+                
+                // Reset all data
+                currentStep = 1;
+                bookingData = {
+                    originZone: '',
+                    pickupPoint: '',
+                    destinationZone: '',
+                    destinationProvince: '',
+                    ticketType: '',
+                    departureDate: '',
+                    returnDate: '',
+                    selectedTime: '',
+                    passengerCount: 1,
+                    selectedSeats: [],
+                    passengerInfo: [],
+                    totalAmount: 0
+                };
+                
+                // Reset passenger count display
+                document.getElementById('passenger-count').textContent = '1';
+                
+                showStep(1);
+            });
+        }
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', function() {
+            // Hide loading screen after animation
+            setTimeout(() => {
+                document.getElementById('loading-screen').style.display = 'none';
+                initAuth();
+                showStep(1);
+            }, 4000);
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            if (seatListener) {
+                seatListener();
+            }
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97cdf167771f2db0',t:'MTc1NzQ5NzAwOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
