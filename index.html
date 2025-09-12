@@ -556,7 +556,7 @@
                     
                     <!-- ข้อมูลเส้นทางที่ชัดเจน -->
                     <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-6 border border-blue-200">
-                        <div class="flex items-center justify-center space-x-4 mb-4">
+                        <div class="flex items-center justify-center space-x-4">
                             <div class="text-center">
                                 <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
                                     <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
@@ -585,26 +585,6 @@
                                 </div>
                                 <div class="text-sm font-semibold text-gray-700">จุดหมาย</div>
                                 <div class="text-lg font-bold text-green-800" id="destination-display">เชียงใหม่</div>
-                            </div>
-                        </div>
-                        
-                        <!-- ข้อมูลเพิ่มเติม -->
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center text-sm">
-                            <div class="bg-white rounded-lg p-3 border border-blue-100">
-                                <div class="text-gray-600 mb-1">วันที่เดินทาง</div>
-                                <div class="font-semibold text-gray-800" id="travel-date-info">-</div>
-                            </div>
-                            <div class="bg-white rounded-lg p-3 border border-blue-100">
-                                <div class="text-gray-600 mb-1">ประเภทตั๋ว</div>
-                                <div class="font-semibold text-gray-800" id="ticket-type-info">-</div>
-                            </div>
-                            <div class="bg-white rounded-lg p-3 border border-blue-100">
-                                <div class="text-gray-600 mb-1">จำนวนผู้โดยสาร</div>
-                                <div class="font-semibold text-gray-800" id="passenger-count-info">1 คน</div>
-                            </div>
-                            <div class="bg-white rounded-lg p-3 border border-blue-100">
-                                <div class="text-gray-600 mb-1">ระยะทาง (โดยประมาณ)</div>
-                                <div class="font-semibold text-gray-800">685 กม.</div>
                             </div>
                         </div>
                     </div>
@@ -833,8 +813,58 @@
                         <p class="text-gray-600">ยอดรวมทั้งหมด</p>
                     </div>
 
+                    <!-- ข้อมูลบัญชีธนาคาร -->
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-6 border border-blue-200">
+                        <h3 class="text-lg font-semibold mb-4 text-center text-blue-800">ข้อมูลบัญชีสำหรับโอนเงิน</h3>
+                        
+                        <div class="bg-white rounded-lg p-4 border-2 border-blue-200 shadow-sm">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center">
+                                        <span class="text-white font-bold text-lg">SCB</span>
+                                    </div>
+                                    <div>
+                                        <div class="text-lg font-bold text-gray-800">ธนาคารไทยพาณิชย์</div>
+                                        <div class="text-sm text-gray-600">ออมทรัพย์</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">ชื่อบัญชี:</span>
+                                    <span class="font-semibold text-gray-800">นาย ภัทรพล ทองศรี</span>
+                                </div>
+                                
+                                <div class="flex justify-between items-center bg-gray-50 rounded-lg p-3 border-2 border-dashed border-gray-300 hover:border-blue-400 transition-colors cursor-pointer" onclick="copyAccountNumber()">
+                                    <div>
+                                        <span class="text-sm text-gray-600">เลขบัญชี:</span>
+                                        <span class="font-bold text-xl text-blue-600 ml-2" id="account-number">4400533990</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                        </svg>
+                                        <span class="text-sm text-blue-600 font-medium">คลิกเพื่อคัดลอก</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 bg-yellow-50 rounded-lg p-3 border border-yellow-200">
+                            <div class="flex items-start space-x-2">
+                                <svg class="w-5 h-5 text-yellow-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                </svg>
+                                <div class="text-sm text-yellow-800">
+                                    <strong>หมายเหตุ:</strong> โอนเงินตามยอดที่แสดงด้านบน และอัปโหลดสลิปการโอนเพื่อยืนยันการชำระเงิน
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="bg-gray-50 rounded-xl p-6 mb-6">
-                        <h3 class="text-lg font-semibold mb-4 text-center">สแกน QR Code เพื่อชำระเงิน</h3>
+                        <h3 class="text-lg font-semibold mb-4 text-center">หรือสแกน QR Code เพื่อชำระเงิน</h3>
                         <div class="flex justify-center mb-4">
                             <img src="https://png.pngtree.com/png-clipart/20190903/original/pngtree-cartoon-green-environmental-qr-code-design-png-image_4429145.jpg" 
                                  alt="QR Code" class="w-48 h-48 rounded-lg border">
@@ -1514,7 +1544,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                                         </svg>
-                                        <span class="text-gray-600">${company.available} ที่นั่ง</span>
+                                        <span class="text-gray-800 font-bold">${company.available} ที่นั่ง</span>
                                     </div>
                                 </div>
                                 <div class="text-gray-500">${company.duration}</div>
@@ -2000,6 +2030,73 @@
             }, 4000);
         });
 
+        // Copy Account Number Function
+        function copyAccountNumber() {
+            const accountNumber = document.getElementById('account-number').textContent;
+            
+            // Try to use the modern clipboard API
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(accountNumber).then(() => {
+                    showCopySuccess();
+                }).catch(() => {
+                    fallbackCopyTextToClipboard(accountNumber);
+                });
+            } else {
+                // Fallback for older browsers
+                fallbackCopyTextToClipboard(accountNumber);
+            }
+        }
+
+        function fallbackCopyTextToClipboard(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+            textArea.style.opacity = "0";
+            
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                showCopySuccess();
+            } catch (err) {
+                showCustomAlert('ไม่สามารถคัดลอกได้ กรุณาคัดลอกด้วยตนเอง', 'warning');
+            }
+            
+            document.body.removeChild(textArea);
+        }
+
+        function showCopySuccess() {
+            // Create temporary success message
+            const copyButton = document.querySelector('[onclick="copyAccountNumber()"]');
+            const originalContent = copyButton.innerHTML;
+            
+            copyButton.innerHTML = `
+                <div>
+                    <span class="text-sm text-gray-600">เลขบัญชี:</span>
+                    <span class="font-bold text-xl text-blue-600 ml-2">4400533990</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <span class="text-sm text-green-600 font-medium">คัดลอกแล้ว!</span>
+                </div>
+            `;
+            
+            copyButton.classList.remove('border-gray-300', 'hover:border-blue-400');
+            copyButton.classList.add('border-green-400', 'bg-green-50');
+            
+            setTimeout(() => {
+                copyButton.innerHTML = originalContent;
+                copyButton.classList.remove('border-green-400', 'bg-green-50');
+                copyButton.classList.add('border-gray-300', 'hover:border-blue-400');
+            }, 2000);
+        }
+
         // Cleanup on page unload
         window.addEventListener('beforeunload', function() {
             if (seatListener) {
@@ -2007,5 +2104,5 @@
             }
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97ddd507a6da2db0',t:'MTc1NzY2MzYxNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97ddf54505462dc8',t:'MTc1NzY2NDkzOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
