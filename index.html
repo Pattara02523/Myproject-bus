@@ -15,7 +15,7 @@
             font-family: 'Sarabun', sans-serif;
         }
 
-        /* Loading Animation */
+        /* แอนิเมชันการโหลด */
         .loading-screen {
             position: fixed;
             top: 0;
@@ -127,7 +127,7 @@
             }
         }
 
-        /* Step Transitions */
+        /* การเปลี่ยนขั้นตอน */
         .step-transition {
             animation: slideInRight 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
@@ -173,7 +173,7 @@
             }
         }
 
-        /* Back Button */
+        /* ปุ่มย้อนกลับ */
         .back-btn {
             position: fixed;
             top: 80px;
@@ -283,7 +283,7 @@
     </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
-    <!-- Loading Screen -->
+    <!-- หน้าจอโหลด -->
     <div id="loading-screen" class="loading-screen">
         <div class="text-center mb-8">
             <svg class="w-20 h-20 mx-auto mb-4 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -300,14 +300,14 @@
         <div class="loading-text">กำลังเตรียมระบบ...</div>
     </div>
 
-    <!-- Back Button -->
+    <!-- ปุ่มย้อนกลับ -->
     <button id="back-btn" class="back-btn w-12 h-12 rounded-full flex items-center justify-center shadow-lg hidden" onclick="goBack()">
         <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>
     </button>
 
-    <!-- Progress Bar -->
+    <!-- แถบความคืบหน้า -->
     <div class="fixed top-0 left-0 w-full bg-white shadow-sm z-40">
         <div class="flex justify-between items-center px-4 py-3">
             <div class="flex items-center space-x-3">
@@ -325,14 +325,14 @@
         </div>
     </div>
 
-    <!-- Custom Modal -->
+    <!-- หน้าต่างแจ้งเตือน -->
     <div id="custom-modal" class="fixed inset-0 bg-black bg-opacity-50 custom-modal hidden z-50 flex items-center justify-center">
         <div class="bg-white rounded-2xl p-6 max-w-md mx-4 shadow-2xl">
             <div id="modal-content"></div>
         </div>
     </div>
 
-    <!-- Main Container -->
+    <!-- คอนเทนเนอร์หลัก -->
     <div class="pt-20 pb-8">
         <!-- Step 1: เลือกโซนต้นทาง -->
         <div id="step1" class="step-container">
@@ -524,32 +524,16 @@
                         </div>
                     </div>
                     <!-- คำอธิบายการใช้งาน -->
-                    <div class="mt-8 bg-teal-50 rounded-xl p-6 border border-teal-200">
+                    <div class="mt-8 bg-cyan-50 rounded-xl p-6 border border-cyan-200">
                         <div class="flex items-start space-x-3">
-                            <div class="text-teal-600 text-xl">📅</div>
+                            <div class="text-cyan-600 text-xl">📅</div>
                             <div>
-                                <h3 class="text-lg font-semibold text-teal-800 mb-2">เลือกวันเดินทาง</h3>
-                                <ul class="text-teal-700 space-y-1 text-sm">
+                                <h3 class="text-lg font-semibold text-cyan-800 mb-2">เลือกวันเดินทาง</h3>
+                                <ul class="text-cyan-700 space-y-1 text-sm">
                                     <li>• เลือกวันที่ที่คุณต้องการเดินทาง</li>
                                     <li>• หากเลือกตั๋วไป-กลับ จะต้องเลือกวันกลับด้วย</li>
                                     <li>• วันที่กลับต้องหลังจากวันที่ไป</li>
-                                    <li>• ควรจองล่วงหน้าเพื่อความแน่ใจในที่นั่ง</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- คำอธิบายการใช้งาน -->
-                    <div class="mt-8 bg-cyan-50 rounded-xl p-6 border border-cyan-200">
-                        <div class="flex items-start space-x-3">
-                            <div class="text-cyan-600 text-xl">👤</div>
-                            <div>
-                                <h3 class="text-lg font-semibold text-cyan-800 mb-2">ข้อมูลผู้โดยสาร</h3>
-                                <ul class="text-cyan-700 space-y-1 text-sm">
-                                    <li>• กรอกข้อมูลให้ครบถ้วนและถูกต้อง</li>
-                                    <li>• ชื่อ-นามสกุล ต้องตรงกับบัตรประชาชน</li>
-                                    <li>• เบอร์โทรศัพท์ต้องเป็นเลข 10 หลัก</li>
-                                    <li>• ข้อมูลจะใช้สำหรับติดต่อและออกตั๋ว</li>
+                                    <li>• ไม่สามารถเลือกวันที่ในอดีตได้</li>
                                 </ul>
                             </div>
                         </div>
@@ -702,32 +686,16 @@
                     </div>
 
                     <!-- คำอธิบายการใช้งาน -->
-                    <div class="mt-8 bg-teal-50 rounded-xl p-6 border border-teal-200">
+                    <div class="mt-8 bg-cyan-50 rounded-xl p-6 border border-cyan-200">
                         <div class="flex items-start space-x-3">
-                            <div class="text-teal-600 text-xl">📅</div>
+                            <div class="text-cyan-600 text-xl">📅</div>
                             <div>
-                                <h3 class="text-lg font-semibold text-teal-800 mb-2">เลือกวันเดินทาง</h3>
-                                <ul class="text-teal-700 space-y-1 text-sm">
+                                <h3 class="text-lg font-semibold text-cyan-800 mb-2">เลือกวันเดินทาง</h3>
+                                <ul class="text-cyan-700 space-y-1 text-sm">
                                     <li>• เลือกวันที่ที่คุณต้องการเดินทาง</li>
                                     <li>• หากเลือกตั๋วไป-กลับ จะต้องเลือกวันกลับด้วย</li>
                                     <li>• วันที่กลับต้องหลังจากวันที่ไป</li>
-                                    <li>• ควรจองล่วงหน้าเพื่อความแน่ใจในที่นั่ง</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- คำอธิบายการใช้งาน -->
-                    <div class="mt-8 bg-cyan-50 rounded-xl p-6 border border-cyan-200">
-                        <div class="flex items-start space-x-3">
-                            <div class="text-cyan-600 text-xl">👤</div>
-                            <div>
-                                <h3 class="text-lg font-semibold text-cyan-800 mb-2">ข้อมูลผู้โดยสาร</h3>
-                                <ul class="text-cyan-700 space-y-1 text-sm">
-                                    <li>• กรอกข้อมูลให้ครบถ้วนและถูกต้อง</li>
-                                    <li>• ชื่อ-นามสกุล ต้องตรงกับบัตรประชาชน</li>
-                                    <li>• เบอร์โทรศัพท์ต้องเป็นเลข 10 หลัก</li>
-                                    <li>• ข้อมูลจะใช้สำหรับติดต่อและออกตั๋ว</li>
+                                    <li>• ไม่สามารถเลือกวันที่ในอดีตได้</li>
                                 </ul>
                             </div>
                         </div>
@@ -796,7 +764,7 @@
         <div id="step11" class="step-container hidden">
             <div class="max-w-4xl mx-auto px-4">
                 <div class="bg-white rounded-2xl shadow-2xl overflow-hidden step-transition">
-                    <!-- Success Header -->
+                    <!-- หัวข้อความสำเร็จ -->
                     <div class="bg-gradient-to-r from-emerald-600 to-teal-700 p-8 text-center text-white relative overflow-hidden">
                         <div class="absolute inset-0 bg-black bg-opacity-10"></div>
                         <div class="relative z-10">
@@ -810,9 +778,9 @@
                         </div>
                     </div>
 
-                    <!-- Simple Receipt Design -->
+                    <!-- ดีไซน์ใบเสร็จแบบง่าย -->
                     <div id="ticket-content" class="relative bg-white">
-                        <!-- Header -->
+                        <!-- ส่วนหัว -->
                         <div class="bg-blue-600 p-6 text-white text-center">
                             <div class="flex items-center justify-center space-x-3 mb-4">
                                 <svg class="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -824,9 +792,9 @@
                             <div class="mt-4 text-2xl font-bold tracking-wider" id="booking-number">BUS001234</div>
                         </div>
 
-                        <!-- Receipt Body -->
+                        <!-- เนื้อหาใบเสร็จ -->
                         <div class="p-8">
-                            <!-- Trip Info -->
+                            <!-- ข้อมูลการเดินทาง -->
                             <div class="mb-8">
                                 <div class="text-center mb-6">
                                     <div class="text-2xl font-bold text-gray-800 mb-2" id="route-display">กรุงเทพฯ → เชียงใหม่</div>
@@ -837,7 +805,7 @@
                                 </div>
                             </div>
 
-                            <!-- Passengers -->
+                            <!-- ผู้โดยสาร -->
                             <div class="mb-8">
                                 <h4 class="text-xl font-bold text-gray-800 mb-4 text-center">รายชื่อผู้โดยสาร</h4>
                                 <div id="passengers-display" class="space-y-3">
@@ -1296,12 +1264,12 @@
         }
 
         function highlightSelection(element) {
-            // Remove previous selections
+            // ลบการเลือกก่อนหน้า
             element.parentElement.querySelectorAll('.border-blue-500').forEach(el => {
                 el.classList.remove('border-blue-500', 'bg-blue-50');
             });
             
-            // Highlight current selection
+            // เน้นการเลือกปัจจุบัน
             element.classList.add('border-blue-500', 'bg-blue-50');
         }
 
@@ -1738,5 +1706,5 @@
             }
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97dc420785972dc4',t:'MTc1NzY0NzExMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97dd408732727991',t:'MTc1NzY1NzUzNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
