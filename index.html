@@ -341,21 +341,36 @@
                     <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">เลือกโซนต้นทาง</h2>
                     <div class="grid grid-cols-2 gap-4">
                         <button onclick="selectOriginZone('north')" class="zone-btn p-6 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all">
-                            <div class="text-4xl mb-2">🏔️</div>
+                            <div class="text-4xl mb-3">🏔️</div>
                             <div class="font-semibold">ภาคเหนือ</div>
                         </button>
                         <button onclick="selectOriginZone('central')" class="zone-btn p-6 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all">
-                            <div class="text-4xl mb-2">🏙️</div>
+                            <div class="text-4xl mb-3">🏙️</div>
                             <div class="font-semibold">ภาคกลาง</div>
                         </button>
                         <button onclick="selectOriginZone('northeast')" class="zone-btn p-6 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all">
-                            <div class="text-4xl mb-2">🌾</div>
+                            <div class="text-4xl mb-3">🌾</div>
                             <div class="font-semibold">ภาคอีสาน</div>
                         </button>
                         <button onclick="selectOriginZone('south')" class="zone-btn p-6 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all">
-                            <div class="text-4xl mb-2">🏖️</div>
+                            <div class="text-4xl mb-3">🏖️</div>
                             <div class="font-semibold">ภาคใต้</div>
                         </button>
+                    </div>
+                    
+                    <!-- คำอธิบายการใช้งาน -->
+                    <div class="mt-8 bg-blue-50 rounded-xl p-6 border border-blue-200">
+                        <div class="flex items-start space-x-3">
+                            <div class="text-blue-600 text-xl">💡</div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-blue-800 mb-2">วิธีการใช้งาน</h3>
+                                <ul class="text-blue-700 space-y-1 text-sm">
+                                    <li>• เลือกภูมิภาคที่คุณต้องการเดินทางออกจาก</li>
+                                    <li>• คลิกที่โซนที่ต้องการ ระบบจะไปขั้นตอนถัดไปโดยอัตโนมัติ</li>
+                                    <li>• หากเลือกผิด สามารถกดปุ่ม "ย้อนกลับ" ที่มุมซ้ายบนได้</li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -366,16 +381,23 @@
             <div class="max-w-2xl mx-auto px-4">
                 <div class="bg-white rounded-2xl shadow-xl p-8 step-transition">
                     <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">เลือกจุดขึ้นรถ</h2>
-                    <div class="space-y-3">
-                        <button onclick="selectPickupPoint('mochit')" class="w-full p-4 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all text-left">
-                            <div class="flex items-center">
-                                <div class="text-2xl mr-4">🚌</div>
-                                <div>
-                                    <div class="font-semibold">สถานีขนส่งหมอชิต</div>
-                                    <div class="text-sm text-gray-600">กรุงเทพมหานคร</div>
-                                </div>
+                    <div id="pickup-points-list" class="space-y-3">
+                        <!-- จุดขึ้นรถจะถูกเพิ่มที่นี่ -->
+                    </div>
+                    
+                    <!-- คำอธิบายการใช้งาน -->
+                    <div class="mt-8 bg-green-50 rounded-xl p-6 border border-green-200">
+                        <div class="flex items-start space-x-3">
+                            <div class="text-green-600 text-xl">🚌</div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-green-800 mb-2">ข้อมูลสำคัญ</h3>
+                                <ul class="text-green-700 space-y-1 text-sm">
+                                    <li>• เลือกสถานีขนส่งที่คุณสะดวกในการเดินทางไป</li>
+                                    <li>• แต่ละสถานีมีเวลาออกรถและราคาที่อาจแตกต่างกัน</li>
+                                    <li>• ควรไปถึงสถานีก่อนเวลาออกรถอย่างน้อย 30 นาที</li>
+                                </ul>
                             </div>
-                        </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -388,21 +410,36 @@
                     <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">เลือกโซนปลายทาง</h2>
                     <div class="grid grid-cols-2 gap-4">
                         <button onclick="selectDestinationZone('north')" class="zone-btn p-6 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all">
-                            <div class="text-4xl mb-2">🏔️</div>
+                            <div class="text-4xl mb-3">🏔️</div>
                             <div class="font-semibold">ภาคเหนือ</div>
                         </button>
                         <button onclick="selectDestinationZone('central')" class="zone-btn p-6 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all">
-                            <div class="text-4xl mb-2">🏙️</div>
+                            <div class="text-4xl mb-3">🏙️</div>
                             <div class="font-semibold">ภาคกลาง</div>
                         </button>
                         <button onclick="selectDestinationZone('northeast')" class="zone-btn p-6 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all">
-                            <div class="text-4xl mb-2">🌾</div>
+                            <div class="text-4xl mb-3">🌾</div>
                             <div class="font-semibold">ภาคอีสาน</div>
                         </button>
                         <button onclick="selectDestinationZone('south')" class="zone-btn p-6 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all">
-                            <div class="text-4xl mb-2">🏖️</div>
+                            <div class="text-4xl mb-3">🏖️</div>
                             <div class="font-semibold">ภาคใต้</div>
                         </button>
+                    </div>
+                    
+                    <!-- คำอธิบายการใช้งาน -->
+                    <div class="mt-8 bg-purple-50 rounded-xl p-6 border border-purple-200">
+                        <div class="flex items-start space-x-3">
+                            <div class="text-purple-600 text-xl">🎯</div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-purple-800 mb-2">เลือกจุดหมาย</h3>
+                                <ul class="text-purple-700 space-y-1 text-sm">
+                                    <li>• เลือกภูมิภาคที่คุณต้องการเดินทางไป</li>
+                                    <li>• ระยะทางและราคาจะขึ้นอยู่กับจุดต้นทางและปลายทาง</li>
+                                    <li>• เส้นทางข้ามภูมิภาคจะใช้เวลานานกว่า</li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -415,6 +452,21 @@
                     <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">เลือกจังหวัดปลายทาง</h2>
                     <div id="province-list" class="space-y-3 max-h-96 overflow-y-auto">
                         <!-- จังหวัดจะถูกเพิ่มที่นี่ -->
+                    </div>
+                    
+                    <!-- คำอธิบายการใช้งาน -->
+                    <div class="mt-8 bg-orange-50 rounded-xl p-6 border border-orange-200">
+                        <div class="flex items-start space-x-3">
+                            <div class="text-orange-600 text-xl">📍</div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-orange-800 mb-2">เลือกจังหวัด</h3>
+                                <ul class="text-orange-700 space-y-1 text-sm">
+                                    <li>• เลือกจังหวัดที่คุณต้องการเดินทางไป</li>
+                                    <li>• สามารถเลื่อนดูจังหวัดทั้งหมดในภูมิภาคนี้</li>
+                                    <li>• จังหวัดที่ได้รับความนิยมจะแสดงก่อน</li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -437,6 +489,21 @@
                             <div class="text-sm text-gray-600">เดินทางไปและกลับ</div>
                         </button>
                     </div>
+                    
+                    <!-- คำอธิบายการใช้งาน -->
+                    <div class="mt-8 bg-indigo-50 rounded-xl p-6 border border-indigo-200">
+                        <div class="flex items-start space-x-3">
+                            <div class="text-indigo-600 text-xl">🎫</div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-indigo-800 mb-2">ประเภทตั๋ว</h3>
+                                <ul class="text-indigo-700 space-y-1 text-sm">
+                                    <li>• <strong>เที่ยวเดียว:</strong> เหมาะสำหรับการเดินทางไปเท่านั้น</li>
+                                    <li>• <strong>ไป-กลับ:</strong> ประหยัดกว่าและสะดวกสำหรับการเดินทางกลับ</li>
+                                    <li>• ตั๋วไป-กลับจะต้องเลือกวันที่กลับในขั้นตอนถัดไป</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -456,6 +523,38 @@
                             <input type="date" id="return-date" class="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors text-lg">
                         </div>
                     </div>
+                    <!-- คำอธิบายการใช้งาน -->
+                    <div class="mt-8 bg-teal-50 rounded-xl p-6 border border-teal-200">
+                        <div class="flex items-start space-x-3">
+                            <div class="text-teal-600 text-xl">📅</div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-teal-800 mb-2">เลือกวันเดินทาง</h3>
+                                <ul class="text-teal-700 space-y-1 text-sm">
+                                    <li>• เลือกวันที่ที่คุณต้องการเดินทาง</li>
+                                    <li>• หากเลือกตั๋วไป-กลับ จะต้องเลือกวันกลับด้วย</li>
+                                    <li>• วันที่กลับต้องหลังจากวันที่ไป</li>
+                                    <li>• ควรจองล่วงหน้าเพื่อความแน่ใจในที่นั่ง</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- คำอธิบายการใช้งาน -->
+                    <div class="mt-8 bg-cyan-50 rounded-xl p-6 border border-cyan-200">
+                        <div class="flex items-start space-x-3">
+                            <div class="text-cyan-600 text-xl">👤</div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-cyan-800 mb-2">ข้อมูลผู้โดยสาร</h3>
+                                <ul class="text-cyan-700 space-y-1 text-sm">
+                                    <li>• กรอกข้อมูลให้ครบถ้วนและถูกต้อง</li>
+                                    <li>• ชื่อ-นามสกุล ต้องตรงกับบัตรประชาชน</li>
+                                    <li>• เบอร์โทรศัพท์ต้องเป็นเลข 10 หลัก</li>
+                                    <li>• ข้อมูลจะใช้สำหรับติดต่อและออกตั๋ว</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="mt-8 flex justify-center">
                         <button onclick="nextStep()" class="btn-primary text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg">
                             ดำเนินการต่อ
@@ -491,6 +590,22 @@
                                 </button>
                             </div>
                             <p class="text-sm text-gray-600 mt-2">สูงสุด 4 คน</p>
+                        </div>
+                    </div>
+
+                    <!-- คำอธิบายการใช้งาน -->
+                    <div class="mt-8 bg-yellow-50 rounded-xl p-6 border border-yellow-200">
+                        <div class="flex items-start space-x-3">
+                            <div class="text-yellow-600 text-xl">⏰</div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-yellow-800 mb-2">เลือกเวลาและจำนวนผู้โดยสาร</h3>
+                                <ul class="text-yellow-700 space-y-1 text-sm">
+                                    <li>• เลือกเวลาที่เหมาะสมกับการเดินทางของคุณ</li>
+                                    <li>• ราคาอาจแตกต่างกันตามช่วงเวลา</li>
+                                    <li>• จำนวนผู้โดยสารสูงสุด 4 คนต่อการจอง</li>
+                                    <li>• ตรวจสอบจำนวนที่นั่งว่างก่อนเลือก</li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
 
@@ -551,6 +666,22 @@
                         </div>
                     </div>
 
+                    <!-- คำอธิบายการใช้งาน -->
+                    <div class="mt-8 bg-pink-50 rounded-xl p-6 border border-pink-200">
+                        <div class="flex items-start space-x-3">
+                            <div class="text-pink-600 text-xl">💺</div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-pink-800 mb-2">การเลือกที่นั่ง</h3>
+                                <ul class="text-pink-700 space-y-1 text-sm">
+                                    <li>• คลิกที่นั่งที่ต้องการ (สีเทา = ว่าง, สีน้ำเงิน = เลือกแล้ว, สีแดง = ไม่ว่าง)</li>
+                                    <li>• เลือกที่นั่งให้ครบตามจำนวนผู้โดยสาร</li>
+                                    <li>• ที่นั่งด้านหน้าใกล้คนขับ ที่นั่งด้านหลังเงียบกว่า</li>
+                                    <li>• สามารถเปลี่ยนที่นั่งได้โดยคลิกใหม่</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="flex justify-center">
                         <button onclick="nextStep()" id="confirm-seats-btn" class="btn-primary text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg opacity-50 cursor-not-allowed" disabled>
                             ยืนยันที่นั่ง
@@ -568,6 +699,38 @@
                     
                     <div id="passenger-forms" class="space-y-6">
                         <!-- ฟอร์มผู้โดยสารจะถูกสร้างที่นี่ -->
+                    </div>
+
+                    <!-- คำอธิบายการใช้งาน -->
+                    <div class="mt-8 bg-teal-50 rounded-xl p-6 border border-teal-200">
+                        <div class="flex items-start space-x-3">
+                            <div class="text-teal-600 text-xl">📅</div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-teal-800 mb-2">เลือกวันเดินทาง</h3>
+                                <ul class="text-teal-700 space-y-1 text-sm">
+                                    <li>• เลือกวันที่ที่คุณต้องการเดินทาง</li>
+                                    <li>• หากเลือกตั๋วไป-กลับ จะต้องเลือกวันกลับด้วย</li>
+                                    <li>• วันที่กลับต้องหลังจากวันที่ไป</li>
+                                    <li>• ควรจองล่วงหน้าเพื่อความแน่ใจในที่นั่ง</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- คำอธิบายการใช้งาน -->
+                    <div class="mt-8 bg-cyan-50 rounded-xl p-6 border border-cyan-200">
+                        <div class="flex items-start space-x-3">
+                            <div class="text-cyan-600 text-xl">👤</div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-cyan-800 mb-2">ข้อมูลผู้โดยสาร</h3>
+                                <ul class="text-cyan-700 space-y-1 text-sm">
+                                    <li>• กรอกข้อมูลให้ครบถ้วนและถูกต้อง</li>
+                                    <li>• ชื่อ-นามสกุล ต้องตรงกับบัตรประชาชน</li>
+                                    <li>• เบอร์โทรศัพท์ต้องเป็นเลข 10 หลัก</li>
+                                    <li>• ข้อมูลจะใช้สำหรับติดต่อและออกตั๋ว</li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="mt-8 flex justify-center">
@@ -604,6 +767,22 @@
                         <input type="file" id="payment-slip" accept="image/*" class="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors">
                     </div>
 
+                    <!-- คำอธิบายการใช้งาน -->
+                    <div class="mt-8 bg-emerald-50 rounded-xl p-6 border border-emerald-200">
+                        <div class="flex items-start space-x-3">
+                            <div class="text-emerald-600 text-xl">💳</div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-emerald-800 mb-2">การชำระเงิน</h3>
+                                <ul class="text-emerald-700 space-y-1 text-sm">
+                                    <li>• สแกน QR Code ด้วยแอปธนาคารของคุณ</li>
+                                    <li>• โอนเงินตามยอดที่แสดง</li>
+                                    <li>• อัปโหลดสลิปการโอนเงินเพื่อยืนยัน</li>
+                                    <li>• ระบบจะตรวจสอบและยืนยันการชำระเงิน</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="flex justify-center">
                         <button onclick="confirmPayment()" id="confirm-payment-btn" class="btn-primary text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg opacity-50 cursor-not-allowed" disabled>
                             ยืนยันการชำระเงิน
@@ -626,143 +805,77 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                 </svg>
                             </div>
-                            <h2 class="text-3xl font-bold mb-2">การจองสำเร็จ!</h2>
+                            <h2 class="text-3xl font-bold mb-2">การซื้อตั๋วสำเร็จ!</h2>
                             <p class="text-lg opacity-90">ขอบคุณที่ใช้บริการ BotestBus</p>
                         </div>
                     </div>
 
-                    <!-- Official Ticket Design -->
+                    <!-- Simple Receipt Design -->
                     <div id="ticket-content" class="relative bg-white">
-                        <!-- Company Header -->
-                        <div class="bg-gradient-to-r from-slate-800 to-slate-900 p-6 text-white">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center space-x-4">
-                                    <div class="w-16 h-16 bg-blue-600 rounded-lg flex items-center justify-center">
-                                        <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                            <path d="M4 6h16v2H4zm0 5h16v6H4zm2 2h12v2H6z"/>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <h3 class="text-2xl font-bold">BotestBus Co., Ltd.</h3>
-                                        <p class="text-sm opacity-80">บริษัท โบเทสบัส จำกัด</p>
-                                        <p class="text-xs opacity-70">ใบจองตั๋วรถทัวร์อิเล็กทรอนิกส์</p>
-                                    </div>
-                                </div>
-                                <div class="text-right">
-                                    <div class="text-xs opacity-80 mb-1">หมายเลขการจอง</div>
-                                    <div class="text-2xl font-bold tracking-wider" id="booking-number">BUS001234</div>
-                                    <div class="text-xs opacity-80 mt-1">Booking Reference</div>
-                                </div>
+                        <!-- Header -->
+                        <div class="bg-blue-600 p-6 text-white text-center">
+                            <div class="flex items-center justify-center space-x-3 mb-4">
+                                <svg class="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M4 6h16v2H4zm0 5h16v6H4zm2 2h12v2H6z"/>
+                                </svg>
+                                <h3 class="text-3xl font-bold">BotestBus</h3>
                             </div>
+                            <p class="text-lg">ใบเสร็จรับเงิน</p>
+                            <div class="mt-4 text-2xl font-bold tracking-wider" id="booking-number">BUS001234</div>
                         </div>
 
-                        <!-- Ticket Body -->
+                        <!-- Receipt Body -->
                         <div class="p-8">
-                            <!-- Trip Summary -->
-                            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-8 border border-blue-200">
-                                <h4 class="text-xl font-bold text-gray-800 mb-4 text-center">รายละเอียดการเดินทาง</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    <div class="text-center">
-                                        <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                            </svg>
-                                        </div>
-                                        <div class="text-sm text-gray-600 mb-1">เส้นทาง</div>
-                                        <div class="font-bold text-gray-800" id="route-display">กรุงเทพฯ → เชียงใหม่</div>
-                                    </div>
-                                    <div class="text-center">
-                                        <div class="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4h3a1 1 0 011 1v8a1 1 0 01-1 1H5a1 1 0 01-1-1V8a1 1 0 011-1h3z"/>
-                                            </svg>
-                                        </div>
-                                        <div class="text-sm text-gray-600 mb-1">วันที่เดินทาง</div>
-                                        <div class="font-bold text-gray-800" id="travel-date-display">25 ธ.ค. 2567</div>
-                                    </div>
-                                    <div class="text-center">
-                                        <div class="w-12 h-12 bg-orange-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                            </svg>
-                                        </div>
-                                        <div class="text-sm text-gray-600 mb-1">เวลาออกเดินทาง</div>
-                                        <div class="font-bold text-gray-800" id="travel-time-display">08:30</div>
+                            <!-- Trip Info -->
+                            <div class="mb-8">
+                                <div class="text-center mb-6">
+                                    <div class="text-2xl font-bold text-gray-800 mb-2" id="route-display">กรุงเทพฯ → เชียงใหม่</div>
+                                    <div class="text-lg text-gray-600">
+                                        <span id="travel-date-display">25 ธ.ค. 2567</span> | 
+                                        <span id="travel-time-display">08:30</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Passenger Information -->
+                            <!-- Passengers -->
                             <div class="mb-8">
-                                <h4 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
-                                    <svg class="w-6 h-6 mr-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
-                                    </svg>
-                                    รายชื่อผู้โดยสาร
-                                </h4>
-                                <div id="passengers-display" class="space-y-4">
+                                <h4 class="text-xl font-bold text-gray-800 mb-4 text-center">รายชื่อผู้โดยสาร</h4>
+                                <div id="passengers-display" class="space-y-3">
                                     <!-- ข้อมูลผู้โดยสารจะแสดงที่นี่ -->
                                 </div>
                             </div>
 
-                            <!-- Seat Information -->
-                            <div class="bg-gray-50 rounded-xl p-6 mb-8">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center space-x-3">
-                                        <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center">
-                                            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                                <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <div class="text-sm text-gray-600">หมายเลขที่นั่ง</div>
-                                            <div class="text-xl font-bold text-gray-800" id="seats-display">12, 13</div>
-                                        </div>
-                                    </div>
-                                    <div class="text-right">
-                                        <div class="text-sm text-gray-600">ยอดรวม</div>
-                                        <div class="text-2xl font-bold text-green-600" id="total-display">฿960</div>
-                                    </div>
+                            <!-- Summary -->
+                            <div class="border-t-2 border-gray-300 pt-6 mb-6">
+                                <div class="flex justify-between items-center mb-4">
+                                    <span class="text-lg font-semibold">ที่นั่ง:</span>
+                                    <span class="text-lg font-bold" id="seats-display">12, 13</span>
+                                </div>
+                                <div class="flex justify-between items-center mb-4">
+                                    <span class="text-lg font-semibold">ประเภทตั๋ว:</span>
+                                    <span class="text-lg font-bold" id="ticket-type-display">เที่ยวเดียว</span>
+                                </div>
+                                <div class="flex justify-between items-center text-2xl font-bold text-green-600 border-t-2 border-gray-200 pt-4">
+                                    <span>ยอดรวม:</span>
+                                    <span id="total-display">฿960</span>
                                 </div>
                             </div>
 
-                            <!-- Booking Details -->
-                            <div class="border-t border-gray-200 pt-6 mb-6">
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-600">วันที่จอง:</span>
-                                        <span class="font-semibold" id="booking-date">20 ธ.ค. 2567</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-600">สถานะ:</span>
-                                        <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">ยืนยันแล้ว</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-gray-600">ประเภทตั๋ว:</span>
-                                        <span class="font-semibold" id="ticket-type-display">เที่ยวเดียว</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- QR Code Section -->
-                            <div class="text-center bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-6 border border-gray-200">
-                                <div class="w-32 h-32 bg-white border-2 border-gray-300 rounded-lg mx-auto mb-4 flex items-center justify-center shadow-sm">
+                            <!-- QR Code -->
+                            <div class="text-center bg-gray-50 rounded-xl p-6">
+                                <div class="w-32 h-32 bg-white border-2 border-gray-300 rounded-lg mx-auto mb-4 flex items-center justify-center">
                                     <svg class="w-20 h-20 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
                                         <path d="M3 3h6v6H3V3zm2 2v2h2V5H5zM3 15h6v6H3v-6zm2 2v2h2v-2H5zM15 3h6v6h-6V3zm2 2v2h2V5h-2zM15 15h2v2h-2v-2zM17 17h2v2h-2v-2zM19 15h2v2h-2v-2zM15 17h2v2h-2v-2zM17 19h2v2h-2v-2zM19 17h2v2h-2v-2z"/>
                                     </svg>
                                 </div>
-                                <p class="text-sm text-gray-600 font-medium">QR Code สำหรับขึ้นรถ</p>
+                                <p class="text-sm text-gray-600">QR Code สำหรับขึ้นรถ</p>
                             </div>
 
                             <!-- Footer -->
                             <div class="text-center mt-8 pt-6 border-t border-gray-200">
-                                <p class="text-xs text-gray-500 mb-2">
-                                    กรุณาแสดงใบจองนี้เมื่อขึ้นรถ | Please present this booking confirmation when boarding
-                                </p>
-                                <p class="text-xs text-gray-400">
-                                    สอบถามข้อมูลเพิ่มเติม โทร 02-123-4567 | For inquiries, call 02-123-4567
-                                </p>
+                                <p class="text-sm text-gray-600 mb-2">วันที่ซื้อ: <span id="booking-date">20 ธ.ค. 2567</span></p>
+                                <p class="text-xs text-gray-500">กรุณาแสดงใบเสร็จนี้เมื่อขึ้นรถ</p>
+                                <p class="text-xs text-gray-400 mt-2">สอบถามข้อมูลเพิ่มเติม โทร 02-123-4567</p>
                             </div>
                         </div>
                     </div>
@@ -780,7 +893,7 @@
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                                 </svg>
-                                <span>จองใหม่</span>
+                                <span>ซื้อใหม่</span>
                             </button>
                         </div>
                     </div>
@@ -823,6 +936,34 @@
         };
 
         let seatListener = null;
+
+        // Pickup Points Data
+        const pickupPoints = {
+            north: [
+                { id: 'chiangmai_arcade', name: 'สถานีขนส่งอาเขต', city: 'เชียงใหม่' },
+                { id: 'chiangrai_terminal', name: 'สถานีขนส่งเชียงราย', city: 'เชียงราย' },
+                { id: 'lampang_terminal', name: 'สถานีขนส่งลำปาง', city: 'ลำปาง' },
+                { id: 'phrae_terminal', name: 'สถานีขนส่งแพร่', city: 'แพร่' }
+            ],
+            central: [
+                { id: 'mochit', name: 'สถานีขนส่งหมอชิต', city: 'กรุงเทพมหานคร' },
+                { id: 'ekkamai', name: 'สถานีขนส่งเอกมัย', city: 'กรุงเทพมหานคร' },
+                { id: 'sai_tai_mai', name: 'สถานีขนส่งสายใต้ใหม่', city: 'กรุงเทพมหานคร' },
+                { id: 'kanchanaburi_terminal', name: 'สถานีขนส่งกาญจนบุรี', city: 'กาญจนบุรี' }
+            ],
+            northeast: [
+                { id: 'korat_terminal', name: 'สถานีขนส่งนครราชสีมา', city: 'นครราชสีมา' },
+                { id: 'khonkaen_terminal', name: 'สถานีขนส่งขอนแก่น', city: 'ขอนแก่น' },
+                { id: 'udon_terminal', name: 'สถานีขนส่งอุดรธานี', city: 'อุดรธานี' },
+                { id: 'ubon_terminal', name: 'สถานีขนส่งอุบลราชธานี', city: 'อุบลราชธานี' }
+            ],
+            south: [
+                { id: 'surat_terminal', name: 'สถานีขนส่งสุราษฎร์ธานี', city: 'สุราษฎร์ธานี' },
+                { id: 'phuket_terminal', name: 'สถานีขนส่งภูเก็ต', city: 'ภูเก็ต' },
+                { id: 'hatyai_terminal', name: 'สถานีขนส่งหาดใหญ่', city: 'สงขลา' },
+                { id: 'nakhon_terminal', name: 'สถานีขนส่งนครศรีธรรมราช', city: 'นครศรีธรรมราช' }
+            ]
+        };
 
         // Province Data
         const provinces = {
@@ -996,7 +1137,9 @@
                 
                 // Re-initialize step if needed
                 setTimeout(() => {
-                    if (previousStep === 4) {
+                    if (previousStep === 2) {
+                        loadPickupPoints();
+                    } else if (previousStep === 4) {
                         loadProvinces();
                     } else if (previousStep === 6) {
                         setupDateInputs();
@@ -1022,7 +1165,9 @@
                     showStep(currentStep);
                     
                     // Special handling for certain steps
-                    if (currentStep === 4) {
+                    if (currentStep === 2) {
+                        loadPickupPoints();
+                    } else if (currentStep === 4) {
                         loadProvinces();
                     } else if (currentStep === 6) {
                         setupDateInputs();
@@ -1099,6 +1244,27 @@
             bookingData.originZone = zone;
             highlightSelection(event.target);
             setTimeout(() => nextStep(), 600);
+        }
+
+        function loadPickupPoints() {
+            const pickupPointsList = document.getElementById('pickup-points-list');
+            const points = pickupPoints[bookingData.originZone] || [];
+            
+            pickupPointsList.innerHTML = points.map(point => `
+                <button onclick="selectPickupPoint('${point.id}')" class="w-full p-4 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all text-left">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                            <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M4 6h16v2H4zm0 5h16v6H4zm2 2h12v2H6z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="font-semibold">${point.name}</div>
+                            <div class="text-sm text-gray-600">${point.city}</div>
+                        </div>
+                    </div>
+                </button>
+            `).join('');
         }
 
         function selectPickupPoint(point) {
@@ -1367,19 +1533,6 @@
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">ผู้โดยสารคนที่ ${i + 1} (ที่นั่ง ${bookingData.selectedSeats[i]})</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">เลขบัตรประชาชน</label>
-                                <input type="text" id="id-${i}" maxlength="13" class="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors" placeholder="1234567890123" required>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">เพศ</label>
-                                <select id="gender-${i}" class="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors" required>
-                                    <option value="">เลือกเพศ</option>
-                                    <option value="male">ชาย</option>
-                                    <option value="female">หญิง</option>
-                                    <option value="other">ไม่ระบุ</option>
-                                </select>
-                            </div>
-                            <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">ชื่อ</label>
                                 <input type="text" id="fname-${i}" class="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors" placeholder="ชื่อ" required>
                             </div>
@@ -1387,13 +1540,9 @@
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">นามสกุล</label>
                                 <input type="text" id="lname-${i}" class="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors" placeholder="นามสกุล" required>
                             </div>
-                            <div>
+                            <div class="md:col-span-2">
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">เบอร์โทรศัพท์</label>
                                 <input type="tel" id="phone-${i}" maxlength="10" pattern="[0-9]{10}" class="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors" placeholder="0812345678" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">อีเมล</label>
-                                <input type="email" id="email-${i}" class="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors" placeholder="example@email.com">
                             </div>
                         </div>
                     </div>
@@ -1407,20 +1556,12 @@
             bookingData.passengerInfo = [];
             
             for (let i = 0; i < bookingData.passengerCount; i++) {
-                const idCard = document.getElementById(`id-${i}`).value;
-                const gender = document.getElementById(`gender-${i}`).value;
                 const fname = document.getElementById(`fname-${i}`).value;
                 const lname = document.getElementById(`lname-${i}`).value;
                 const phone = document.getElementById(`phone-${i}`).value;
-                const email = document.getElementById(`email-${i}`).value;
 
-                if (!idCard || !gender || !fname || !lname || !phone) {
+                if (!fname || !lname || !phone) {
                     showCustomAlert(`กรุณากรอกข้อมูลผู้โดยสารคนที่ ${i + 1} ให้ครบถ้วน`, 'warning');
-                    return false;
-                }
-
-                if (idCard.length !== 13 || !/^\d+$/.test(idCard)) {
-                    showCustomAlert(`เลขบัตรประชาชนของผู้โดยสารคนที่ ${i + 1} ไม่ถูกต้อง`, 'warning');
                     return false;
                 }
 
@@ -1430,12 +1571,9 @@
                 }
 
                 bookingData.passengerInfo.push({
-                    idCard: idCard,
-                    gender: gender,
                     firstName: fname,
                     lastName: lname,
                     phone: phone,
-                    email: email,
                     seat: bookingData.selectedSeats[i]
                 });
             }
@@ -1471,7 +1609,7 @@
                 // Update seats in Firebase
                 await updateSeatsInFirebase();
                 
-                // Generate booking number
+                // Generate ticket number
                 bookingData.bookingNumber = 'BUS' + Date.now().toString().substr(-6);
                 bookingData.bookingDate = new Date().toLocaleDateString('th-TH');
                 
@@ -1515,47 +1653,16 @@
             
             // Passengers display
             const passengersContainer = document.getElementById('passengers-display');
-            const genderText = {
-                'male': 'ชาย',
-                'female': 'หญิง',
-                'other': 'ไม่ระบุ'
-            };
             
             passengersContainer.innerHTML = bookingData.passengerInfo.map((passenger, index) => `
-                <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
-                    <div class="flex items-start justify-between mb-4">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <div class="text-lg font-bold text-gray-800">${passenger.firstName} ${passenger.lastName}</div>
-                                <div class="text-sm text-gray-600">ผู้โดยสารคนที่ ${index + 1}</div>
-                            </div>
+                <div class="bg-gray-50 rounded-lg p-4 border">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="text-lg font-bold text-gray-800">${passenger.firstName} ${passenger.lastName}</div>
+                            <div class="text-sm text-gray-600">โทร: ${passenger.phone.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3')}</div>
                         </div>
-                        <div class="bg-purple-100 text-purple-800 px-4 py-2 rounded-full text-sm font-semibold">
+                        <div class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
                             ที่นั่ง ${passenger.seat}
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">เลขบัตรประชาชน:</span>
-                            <span class="font-medium">${passenger.idCard.replace(/(\d{1})(\d{4})(\d{5})(\d{2})(\d{1})/, '$1-$2-$3-$4-$5')}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">เพศ:</span>
-                            <span class="font-medium">${genderText[passenger.gender] || passenger.gender}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">เบอร์โทรศัพท์:</span>
-                            <span class="font-medium">${passenger.phone.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3')}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">อีเมล:</span>
-                            <span class="font-medium">${passenger.email || 'ไม่ระบุ'}</span>
                         </div>
                     </div>
                 </div>
@@ -1583,7 +1690,7 @@
         }
 
         function resetBooking() {
-            showCustomConfirm('คุณต้องการเริ่มการจองใหม่หรือไม่?', () => {
+            showCustomConfirm('คุณต้องการเริ่มการซื้อตั๋วใหม่หรือไม่?', () => {
                 // Clean up seat listener
                 if (seatListener) {
                     seatListener();
@@ -1631,5 +1738,5 @@
             }
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97cdf167771f2db0',t:'MTc1NzQ5NzAwOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97dc420785972dc4',t:'MTc1NzY0NzExMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
