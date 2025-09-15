@@ -1215,6 +1215,7 @@
         };
 
         let seatListener = null;
+        let selectedTimeSlot = null;
 
         // Language translations
         const translations = {
@@ -1647,6 +1648,15 @@
             }
         }
 
+        // Helper function to get pickup point name
+        function getPickupPointName(pickupPointId) {
+            if (!pickupPointId || !bookingData.originZone) return 'หมอชิต';
+            
+            const points = pickupPoints[bookingData.originZone] || [];
+            const point = points.find(p => p.id === pickupPointId);
+            return point ? point.name : 'หมอชิต';
+        }
+
         // Custom Alert Functions
         function showCustomAlert(message, type = 'info') {
             const modal = document.getElementById('custom-modal');
@@ -1988,20 +1998,33 @@
             timeSlots.forEach(timeSlot => {
                 slotsHTML += `
                     <div class="mb-4">
-                        <div class="bg-gray-50 rounded-lg p-3 mb-3 border-l-4 border-blue-500">
-                            <h4 class="text-lg font-bold text-gray-800 flex items-center">
-                                <svg class="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                                ${timeSlot.time}
-                            </h4>
-                        </div>
-                        <div class="space-y-2">
+                        <button onclick="selectTimeSlot('${timeSlot.time}')" class="time-slot-btn w-full bg-white border-2 border-gray-200 rounded-lg p-4 hover:border-blue-500 hover:shadow-md transition-all cursor-pointer text-left">
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="text-xl font-bold text-gray-800">${timeSlot.time}</div>
+                                        <div class="text-sm text-gray-500">${timeSlot.companies.length} บริษัทให้เลือก</div>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-lg font-bold text-green-600">เริ่มต้น ฿${Math.min(...timeSlot.companies.map(c => c.price))}</div>
+                                    <div class="text-xs text-gray-500">ต่อคน</div>
+                                </div>
+                            </div>
+                        </button>
+                        
+                        <!-- Companies list (initially hidden) -->
+                        <div id="companies-${timeSlot.time.replace(':', '')}" class="companies-list hidden mt-3 ml-4 space-y-2">
                 `;
                 
                 timeSlot.companies.forEach(company => {
                     slotsHTML += `
-                        <div onclick="selectTimeSlot('${timeSlot.time}', ${company.price}, '${company.name}')" class="time-slot bg-white border-2 border-gray-200 rounded-lg p-4 hover:border-blue-500 hover:shadow-md transition-all cursor-pointer">
+                        <div onclick="selectCompany('${timeSlot.time}', ${company.price}, '${company.name}')" class="company-option bg-gray-50 border-2 border-gray-200 rounded-lg p-4 hover:border-blue-500 hover:bg-blue-50 transition-all cursor-pointer">
                             <!-- Header -->
                             <div class="flex justify-between items-center mb-3">
                                 <div class="flex items-center space-x-3">
@@ -2055,17 +2078,20 @@
         }
 
         function updateSelectionSummary() {
+            // Get pickup point name
+            const pickupPointName = getPickupPointName(bookingData.pickupPoint);
+            
             // Update route
             const routeSummary = document.getElementById('route-summary');
             if (routeSummary) {
-                routeSummary.textContent = `หมอชิต → ${bookingData.destinationProvince || 'ปลายทาง'}`;
+                routeSummary.textContent = `${pickupPointName} → ${bookingData.destinationProvince || 'ปลายทาง'}`;
             }
             
             // Update main route display
             const pickupDisplay = document.getElementById('pickup-display');
             const destinationDisplay = document.getElementById('destination-display');
             if (pickupDisplay) {
-                pickupDisplay.textContent = 'หมอชิต';
+                pickupDisplay.textContent = pickupPointName;
             }
             if (destinationDisplay) {
                 destinationDisplay.textContent = bookingData.destinationProvince || 'เชียงใหม่';
@@ -2102,16 +2128,65 @@
             }
         }
 
-        function selectTimeSlot(time, price, companyName) {
+        function selectTimeSlot(time) {
+            // Hide all company lists first
+            document.querySelectorAll('.companies-list').forEach(list => {
+                list.classList.add('hidden');
+            });
+            
+            // Remove selection from all time slot buttons
+            document.querySelectorAll('.time-slot-btn').forEach(btn => {
+                btn.classList.remove('border-blue-500', 'bg-blue-50');
+            });
+            
+            // Highlight selected time slot
+            event.target.classList.add('border-blue-500', 'bg-blue-50');
+            
+            // Show companies for selected time
+            const companiesId = `companies-${time.replace(':', '')}`;
+            const companiesList = document.getElementById(companiesId);
+            if (companiesList) {
+                companiesList.classList.remove('hidden');
+                
+                // Scroll to companies list smoothly
+                setTimeout(() => {
+                    companiesList.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'nearest' 
+                    });
+                }, 100);
+            }
+            
+            selectedTimeSlot = time;
+            
+            // Reset company selection
+            bookingData.selectedTime = '';
+            bookingData.selectedCompany = '';
+            bookingData.basePrice = 0;
+            
+            // Update summary
+            document.getElementById('time-summary').textContent = 'ยังไม่เลือก';
+            document.getElementById('company-summary').textContent = 'ยังไม่เลือก';
+            document.getElementById('price-summary').textContent = '฿0';
+            
+            // Disable continue button
+            const continueBtn = document.getElementById('continue-step7');
+            continueBtn.disabled = true;
+            continueBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+
+        function selectCompany(time, price, companyName) {
             bookingData.selectedTime = time;
             bookingData.basePrice = price;
             bookingData.selectedCompany = companyName;
             
-            // Highlight selection
-            document.querySelectorAll('.time-slot').forEach(slot => {
-                slot.classList.remove('border-blue-500', 'bg-blue-50');
+            // Remove selection from all company options
+            document.querySelectorAll('.company-option').forEach(option => {
+                option.classList.remove('border-blue-500', 'bg-blue-50');
             });
-            event.target.closest('.time-slot').classList.add('border-blue-500', 'bg-blue-50');
+            
+            // Highlight selected company
+            event.target.classList.add('border-blue-500', 'bg-blue-50');
             
             // Update summary
             document.getElementById('time-summary').textContent = time;
@@ -2861,5 +2936,5 @@
             }
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97de7180c4671d33',t:'MTc1NzY3MDAyNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97f4b3cc06b62dd4',t:'MTc1NzkwMzQyOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
