@@ -62,7 +62,7 @@
                 <h1 class="text-xl font-bold text-gray-800">BotestBus</h1>
             </div>
             <div class="text-sm text-gray-600">
-                <span id="step-text">ขั้นตอน</span> <span id="current-step-display">1</span> <span id="of-text">จาก</span> 11
+                <span id="step-text">ขั้นตอน</span> <span id="current-step-display">1</span> <span id="of-text">จาก</span> <span id="total-steps-display">11</span>
             </div>
         </div>
         <div class="w-full bg-gray-200 h-1">
@@ -80,7 +80,7 @@
     <!-- คอนเทนเนอร์หลัก -->
     <div class="pt-20 pb-8">
         <!-- Step 1: เลือกโซนต้นทาง -->
-        <div id="step1" class="step-container">
+        <div id="step1" class="step-container hidden">
             <div class="max-w-2xl mx-auto px-4">
                 <div class="bg-white rounded-2xl shadow-xl p-8 step-transition">
                     <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">เลือกโซนต้นทาง</h2>
@@ -470,7 +470,11 @@
                         <!-- Selection Summary -->
                         <div class="bg-gray-50 rounded-xl p-6 mt-8">
                             <h3 class="text-xl font-bold text-gray-800 mb-4">สรุปการเลือกขากลับ</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div class="text-center">
+                                    <div class="text-sm text-gray-600">วันที่</div>
+                                    <div class="text-lg font-bold text-green-600" id="return-date-summary">-</div>
+                                </div>
                                 <div class="text-center">
                                     <div class="text-sm text-gray-600">เวลา</div>
                                     <div class="text-lg font-bold text-green-600" id="return-time-summary">ยังไม่เลือก</div>

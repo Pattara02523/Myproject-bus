@@ -1,4 +1,4 @@
-        // Firebase Configuration
+// Firebase Configuration
         const firebaseConfig = window.__firebase_config || {
             apiKey: "demo-key",
             authDomain: "demo.firebaseapp.com",
@@ -34,6 +34,10 @@
             passengerInfo: [],
             totalAmount: 0
         };
+        
+        console.log('Global variables initialized:');
+        console.log('currentStep:', currentStep);
+        console.log('bookingData:', bookingData);
 
         let seatListener = null;
         let selectedTimeSlot = null;
@@ -558,8 +562,14 @@
         }
 
         function showStep(step, direction = 'forward') {
-            if (isTransitioning) return;
+            console.log('showStep called with step:', step, 'direction:', direction);
+            console.log('isTransitioning:', isTransitioning);
+            if (isTransitioning) {
+                console.log('Blocked by isTransitioning in showStep');
+                return;
+            }
             isTransitioning = true;
+            console.log('isTransitioning set to true');
 
             const currentStepElement = document.getElementById(`step${currentStep}`);
             const targetStepElement = document.getElementById(`step${step}`);
@@ -570,8 +580,11 @@
                 
                 setTimeout(() => {
                     // Hide all steps
+                    // ปรับ logic ไม่ให้รวม step12/13 ของขากลับในกรณี one-way
                     const maxSteps = bookingData.ticketType === 'roundtrip' ? 13 : 11;
                     for (let i = 1; i <= maxSteps; i++) {
+                        // ถ้า one-way ให้ข้าม step 8, 10
+                        if (bookingData.ticketType === 'oneway' && (i === 8 || i === 10)) continue;
                         const stepEl = document.getElementById(`step${i}`);
                         if (stepEl) {
                             stepEl.classList.add('hidden');
@@ -612,6 +625,32 @@
                 updateProgress();
                 isTransitioning = false;
             }
+
+            // หลังจากแสดง step แล้ว ให้โหลดข้อมูลที่จำเป็น
+            setTimeout(() => {
+                if (step === 2) {
+                    loadPickupPoints();
+                } else if (step === 4) {
+                    loadProvinces();
+                } else if (step === 6) {
+                    setupDateInputs();
+                } else if (step === 7) {
+                    loadTimeSlots();
+                } else if (step === 8) {
+                    loadReturnTimeSlots();
+                } else if (step === 9) {
+                    generateSeatMap();
+                    listenToSeatChanges();
+                } else if (step === 10) {
+                    generateReturnSeatMap();
+                    listenToReturnSeatChanges();
+                } else if (step === 11) {
+                    generatePassengerForms();
+                } else if (step === 12) {
+                    calculateTotal();
+                    setupPaymentUpload();
+                }
+            }, 400);
         }
 
         function goBack() {
@@ -634,82 +673,32 @@
                 }
                 
                 showStep(previousStep, 'backward');
-                
-                // Re-initialize step if needed
-                setTimeout(() => {
-                    if (previousStep === 2) {
-                        loadPickupPoints();
-                    } else if (previousStep === 4) {
-                        loadProvinces();
-                    } else if (previousStep === 6) {
-                        setupDateInputs();
-                    } else if (previousStep === 7) {
-                        loadTimeSlots();
-                    } else if (previousStep === 8) {
-                        loadReturnTimeSlots();
-                    } else if (previousStep === 9) {
-                        generateSeatMap();
-                        listenToSeatChanges();
-                    } else if (previousStep === 10) {
-                        generateReturnSeatMap();
-                        listenToReturnSeatChanges();
-                    } else if (previousStep === 11) {
-                        generatePassengerForms();
-                    } else if (previousStep === 12) {
-                        calculateTotal();
-                        setupPaymentUpload();
-                    }
-                }, 400);
             }
         }
 
         function nextStep() {
-            if (validateCurrentStep()) {
-                currentStep++;
-                const maxSteps = bookingData.ticketType === 'roundtrip' ? 13 : 11;
-                
-                if (currentStep <= maxSteps) {
-                    // Auto-skip logic for one-way tickets
-                    if (bookingData.ticketType === 'oneway') {
-                        if (currentStep === 8) { // Skip return time selection
-                            currentStep = 9;
-                        } else if (currentStep === 10) { // Skip return seat selection
-                            currentStep = 11;
-                        }
-                    }
-                    
-                    showStep(currentStep);
-                    
-                    // Special handling for certain steps
-                    if (currentStep === 2) {
-                        loadPickupPoints();
-                    } else if (currentStep === 4) {
-                        loadProvinces();
-                    } else if (currentStep === 6) {
-                        setupDateInputs();
-                    } else if (currentStep === 7) {
-                        loadTimeSlots();
-                    } else if (currentStep === 8) {
-                        loadReturnTimeSlots();
-                    } else if (currentStep === 9) {
-                        generateSeatMap();
-                        listenToSeatChanges();
-                    } else if (currentStep === 10) {
-                        generateReturnSeatMap();
-                        listenToReturnSeatChanges();
-                    } else if (currentStep === 11) {
-                        generatePassengerForms();
-                    } else if (currentStep === 12) {
-                        calculateTotal();
-                        setupPaymentUpload();
-                    } else if (currentStep === 13) {
-                        generateTicket();
-                    }
+            // กรณีเลือกเที่ยวเดียว ให้ข้าม step 8 และ 10
+            if (bookingData.ticketType === 'oneway') {
+                if (currentStep === 7) {
+                    currentStep = 9; // ข้ามเลือกเวลาเดินทางกลับ
+                } else if (currentStep === 9) {
+                    currentStep = 11; // ข้ามเลือกที่นั่งขากลับ
+                } else if (currentStep === 11) {
+                    currentStep = 12;
+                } else if (currentStep === 12) {
+                    currentStep = 13;
+                } else {
+                    currentStep++;
                 }
+            } else {
+                // ไป-กลับ ทำงานตามลำดับปกติ
+                currentStep++;
             }
+            showStep(currentStep);
         }
 
         function validateCurrentStep() {
+            console.log('validateCurrentStep called for step:', currentStep);
             switch (currentStep) {
                 case 6:
                     const departureDate = document.getElementById('departure-date').value;
@@ -770,15 +759,26 @@
                     }
                     break;
             }
+            console.log('validateCurrentStep returning true for step:', currentStep);
             return true;
         }
 
         // Step Functions
         function selectOriginZone(zone) {
-            if (isTransitioning) return;
+            console.log('selectOriginZone called with zone:', zone);
+            console.log('isTransitioning:', isTransitioning);
+            if (isTransitioning) {
+                console.log('Blocked by isTransitioning');
+                return;
+            }
             bookingData.originZone = zone;
+            console.log('bookingData.originZone set to:', bookingData.originZone);
             highlightSelection(event.target);
-            setTimeout(() => nextStep(), 600);
+            console.log('About to call nextStep in 600ms');
+            setTimeout(() => {
+                console.log('Calling nextStep now');
+                nextStep();
+            }, 600);
         }
 
         function loadPickupPoints() {
@@ -831,6 +831,7 @@
         }
 
         function highlightSelection(element) {
+            console.log('highlightSelection called with element:', element);
             // ลบการเลือกก่อนหน้า
             element.parentElement.querySelectorAll('.border-blue-500').forEach(el => {
                 el.classList.remove('border-blue-500', 'bg-blue-50');
@@ -838,6 +839,7 @@
             
             // เน้นการเลือกปัจจุบัน
             element.classList.add('border-blue-500', 'bg-blue-50');
+            console.log('highlightSelection completed');
         }
 
         function loadProvinces() {
@@ -925,18 +927,16 @@
                                     <div class="flex items-center space-x-1">
                                         <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 16 16">
                                             <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
-                                        </svg>
-                                        <span class="text-gray-600">${company.rating}</span>
                                     </div>
-                                    <div class="flex items-center space-x-1">
-                                        <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                        </svg>
-                                        <span class="text-gray-800 font-bold">${company.available} ที่นั่ง</span>
-                                    </div>
+                                    <span class="text-gray-600">${company.rating}</span>
                                 </div>
-                                <div class="text-gray-500">${company.duration}</div>
+                                <div class="flex items-center space-x-1">
+                                    <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    </svg>
+                                    <span class="text-gray-800 font-bold">${company.available} ที่นั่ง</span>
+                                </div>
                             </div>
                         </div>
                     `;
@@ -1058,14 +1058,14 @@
             document.querySelectorAll('.company-option').forEach(option => {
                 option.classList.remove('border-blue-500', 'bg-blue-50');
             });
-            
-            // Highlight selected company
             event.target.classList.add('border-blue-500', 'bg-blue-50');
-            
-            // Update summary
             document.getElementById('time-summary').textContent = time;
             document.getElementById('company-summary').textContent = companyName;
-            
+            // อัปเดตวันที่ในสรุป
+            const dateSummary = document.getElementById('date-summary');
+            if (dateSummary && bookingData.departureDate) {
+                dateSummary.textContent = new Date(bookingData.departureDate).toLocaleDateString('th-TH');
+            }
             // Calculate and update price
             const totalPrice = price * bookingData.passengerCount * (bookingData.ticketType === 'roundtrip' ? 2 : 1);
             document.getElementById('price-summary').textContent = `฿${totalPrice.toLocaleString()}`;
@@ -1074,6 +1074,12 @@
             const continueBtn = document.getElementById('continue-step7');
             continueBtn.disabled = false;
             continueBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+
+            // Scroll to summary box after selecting company
+            const summaryBox = document.getElementById('summary-box');
+            if (summaryBox) {
+                summaryBox.scrollIntoView({ behavior: 'smooth' });
+            }
         }
 
         // Return Time Selection Functions
@@ -1088,7 +1094,7 @@
             timeSlots.forEach(timeSlot => {
                 slotsHTML += `
                     <div class="mb-4">
-                        <button onclick="selectReturnTimeSlot('${timeSlot.time}')" class="return-time-slot-btn w-full bg-white border-2 border-gray-200 rounded-lg p-4 hover:border-blue-500 hover:shadow-md transition-all cursor-pointer text-left">
+                        <button onclick="selectReturnTimeSlot('${timeSlot.time}')" class="return-time-slot-btn w-full bg-white border-2 border-gray-200 rounded-lg p-4 hover:border-green-500 hover:shadow-md transition-all cursor-pointer text-left">
                             <div class="flex justify-between items-center">
                                 <div class="flex items-center space-x-3">
                                     <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
@@ -1114,7 +1120,7 @@
                 
                 timeSlot.companies.forEach(company => {
                     slotsHTML += `
-                        <div onclick="selectReturnCompany('${timeSlot.time}', ${company.price}, '${company.name}')" class="return-company-option bg-gray-50 border-2 border-gray-200 rounded-lg p-4 hover:border-green-500 hover:bg-green-50 transition-all cursor-pointer">
+                        <div onclick="selectReturnCompany('${timeSlot.time}', ${company.price}, '${company.name}')" class="return-company-option bg-white border-2 border-green-200 rounded-lg p-4 hover:border-green-500 hover:bg-green-50 transition-all cursor-pointer">
                             <!-- Header -->
                             <div class="flex justify-between items-center mb-3">
                                 <div class="flex items-center space-x-3">
@@ -1141,18 +1147,16 @@
                                     <div class="flex items-center space-x-1">
                                         <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 16 16">
                                             <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
-                                        </svg>
-                                        <span class="text-gray-600">${company.rating}</span>
                                     </div>
-                                    <div class="flex items-center space-x-1">
-                                        <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                        </svg>
-                                        <span class="text-gray-800 font-bold">${company.available} ที่นั่ง</span>
-                                    </div>
+                                    <span class="text-gray-600">${company.rating}</span>
                                 </div>
-                                <div class="text-gray-500">${company.duration}</div>
+                                <div class="flex items-center space-x-1">
+                                    <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    </svg>
+                                    <span class="text-gray-800 font-bold">${company.available} ที่นั่ง</span>
+                                </div>
                             </div>
                         </div>
                     `;
@@ -1242,6 +1246,12 @@
             // Update summary
             document.getElementById('return-time-summary').textContent = time;
             document.getElementById('return-company-summary').textContent = companyName;
+            
+            // อัปเดตวันที่ขากลับในสรุป
+            const returnDateSummary = document.getElementById('return-date-summary');
+            if (returnDateSummary) {
+                returnDateSummary.textContent = bookingData.returnDate || '-';
+            }
             
             // Calculate and update return price
             const returnPrice = price * bookingData.passengerCount;
@@ -2055,23 +2065,37 @@
         }
 
         // Close language menu when clicking outside
-        document.addEventListener('click', function(event) {
-            const languageMenu = document.getElementById('language-menu');
-            const languageButton = event.target.closest('[onclick="toggleLanguageMenu()"]');
+        // document.addEventListener('click', function(event) {
+        //     const languageMenu = document.getElementById('language-menu');
+        //     const languageButton = event.target.closest('[onclick="toggleLanguageMenu()"]');
             
-            if (!languageButton && !languageMenu.contains(event.target)) {
-                languageMenu.classList.add('hidden');
-            }
-        });
+        //     if (!languageButton && !languageMenu.contains(event.target)) {
+        //         languageMenu.classList.add('hidden');
+        //     }
+        // });
 
         // Initialize App
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOMContentLoaded event fired');
             // Hide loading screen after animation
             setTimeout(() => {
+                console.log('Initializing app after 3 seconds');
                 document.getElementById('loading-screen').style.display = 'none';
                 initAuth();
+                console.log('About to call showStep(1)');
                 showStep(1);
             }, 3000);
+
+            const departureDateInput = document.getElementById('departure-date');
+            if (departureDateInput) {
+                departureDateInput.addEventListener('change', function() {
+                    bookingData.departureDate = this.value;
+                    const dateSummary = document.getElementById('date-summary');
+                    if (dateSummary && bookingData.departureDate) {
+                        dateSummary.textContent = new Date(bookingData.departureDate).toLocaleDateString('th-TH');
+                    }
+                });
+            }
         });
 
         // Copy Account Number Function
