@@ -439,8 +439,66 @@
             </div>
         </div>
 
-        <!-- Step 8: เลือกที่นั่ง -->
+        <!-- Step 8: เลือกเวลาเดินทางกลับ (เฉพาะตั๋วไป-กลับ) -->
         <div id="step8" class="step-container hidden">
+            <div class="max-w-4xl mx-auto px-4">
+                <div class="bg-white rounded-2xl shadow-2xl overflow-hidden step-transition">
+                    <!-- Header -->
+                    <div class="bg-gradient-to-r from-green-500 to-emerald-600 p-8 text-center text-white relative overflow-hidden">
+                        <div class="absolute inset-0 bg-black bg-opacity-10"></div>
+                        <div class="relative z-10">
+                            <h2 class="text-3xl font-bold mb-2">เลือกเวลาเดินทางกลับ</h2>
+                            <p class="text-lg opacity-90">เลือกเวลาและบริษัทสำหรับขากลับ</p>
+                        </div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="p-8">
+                        <!-- Route Summary -->
+                        <div class="bg-green-50 rounded-xl p-6 mb-8">
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-green-800 mb-2" id="return-route-summary">เชียงใหม่ → หมอชิต</div>
+                                <div class="text-lg text-green-600" id="return-date-info">28 ธันวาคม 2567</div>
+                            </div>
+                        </div>
+
+                        <!-- Time Slots -->
+                        <div id="return-time-slots" class="space-y-4">
+                            <!-- Time slots will be loaded here -->
+                        </div>
+
+                        <!-- Selection Summary -->
+                        <div class="bg-gray-50 rounded-xl p-6 mt-8">
+                            <h3 class="text-xl font-bold text-gray-800 mb-4">สรุปการเลือกขากลับ</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="text-center">
+                                    <div class="text-sm text-gray-600">เวลา</div>
+                                    <div class="text-lg font-bold text-green-600" id="return-time-summary">ยังไม่เลือก</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-sm text-gray-600">บริษัท</div>
+                                    <div class="text-lg font-bold text-green-600" id="return-company-summary">ยังไม่เลือก</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-sm text-gray-600">ราคา</div>
+                                    <div class="text-lg font-bold text-green-600" id="return-price-summary">฿0</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Continue Button -->
+                        <div class="text-center mt-8">
+                            <button id="continue-step8" onclick="nextStep()" disabled class="btn-primary text-white px-8 py-3 rounded-xl font-semibold transition-all opacity-50 cursor-not-allowed">
+                                ดำเนินการต่อ
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 9: เลือกที่นั่ง -->
+        <div id="step9" class="step-container hidden">
             <div class="max-w-4xl mx-auto px-4">
                 <div class="bg-white rounded-2xl shadow-xl p-8 step-transition">
                     <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">เลือกที่นั่ง</h2>
@@ -512,8 +570,59 @@
             </div>
         </div>
 
-        <!-- Step 9: กรอกข้อมูลผู้โดยสาร -->
-        <div id="step9" class="step-container hidden">
+        <!-- Step 10: เลือกที่นั่งขากลับ (เฉพาะตั๋วไป-กลับ) -->
+        <div id="step10" class="step-container hidden">
+            <div class="max-w-4xl mx-auto px-4">
+                <div class="bg-white rounded-2xl shadow-xl p-8 step-transition">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">เลือกที่นั่งขากลับ</h2>
+                    <p class="text-center text-gray-600 mb-6">เลือก <span id="return-required-seats">1</span> ที่นั่ง | ที่นั่งที่เลือก: <span id="return-selected-seats-display" class="font-semibold text-green-600">ไม่มี</span></p>
+                    
+                    <!-- Bus Layout -->
+                    <div class="bg-gray-100 rounded-xl p-6 mb-6">
+                        <!-- Driver -->
+                        <div class="text-center mb-4">
+                            <div class="bg-gray-800 text-white px-4 py-2 rounded-lg inline-block text-sm font-semibold">🚗 คนขับ</div>
+                        </div>
+                        
+                        <!-- Front Seats -->
+                        <div id="return-front-seats" class="mb-4">
+                            <!-- Front seats will be generated here -->
+                        </div>
+                        
+                        <!-- Back Seats -->
+                        <div id="return-back-seats">
+                            <!-- Back seats will be generated here -->
+                        </div>
+                        
+                        <!-- Legend -->
+                        <div class="flex justify-center space-x-6 mt-6 text-sm">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-4 h-4 bg-gray-300 rounded border-2 border-gray-400"></div>
+                                <span>ว่าง</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-4 h-4 bg-green-500 rounded border-2 border-green-600"></div>
+                                <span>ที่เลือก</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-4 h-4 bg-red-500 rounded border-2 border-red-600"></div>
+                                <span>ไม่ว่าง</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Confirm Button -->
+                    <div class="text-center">
+                        <button id="confirm-return-seats-btn" onclick="nextStep()" disabled class="btn-primary text-white px-8 py-3 rounded-xl font-semibold transition-all opacity-50 cursor-not-allowed">
+                            ยืนยันที่นั่งขากลับ
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 11: กรอกข้อมูลผู้โดยสาร -->
+        <div id="step11" class="step-container hidden">
             <div class="max-w-4xl mx-auto px-4">
                 <div class="bg-white rounded-2xl shadow-xl p-8 step-transition">
                     <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">ข้อมูลผู้โดยสาร</h2>
@@ -547,8 +656,8 @@
             </div>
         </div>
 
-        <!-- Step 10: ชำระเงิน -->
-        <div id="step10" class="step-container hidden">
+        <!-- Step 12: ชำระเงิน -->
+        <div id="step12" class="step-container hidden">
             <div class="max-w-2xl mx-auto px-4">
                 <div class="bg-white rounded-2xl shadow-xl p-8 step-transition">
                     <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">ชำระเงิน</h2>
@@ -647,8 +756,8 @@
             </div>
         </div>
 
-        <!-- Step 11: การจองสำเร็จ -->
-        <div id="step11" class="step-container hidden">
+        <!-- Step 13: การจองสำเร็จ -->
+        <div id="step13" class="step-container hidden">
             <div class="max-w-4xl mx-auto px-4">
                 <div class="bg-white rounded-2xl shadow-2xl overflow-hidden step-transition">
                     <!-- หัวข้อความสำเร็จ -->
@@ -743,7 +852,8 @@
                                     <div class="inline-block bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-semibold mb-4">
                                         🔄 ขากลับ
                                     </div>
-                                    <div class="text-xl font-bold text-gray-800 mb-4" id="return-route-display">เชียงใหม่ → กรุงเทพฯ</div>
+                                    <div class="text-xl font-bold text-gray-800 mb-2" id="return-route-display">เชียงใหม่ → กรุงเทพฯ</div>
+                                    <div class="text-lg text-gray-600 mb-2" id="return-company-display">บริษัทขนส่งจำกัด</div>
                                     <div class="flex items-center justify-center space-x-4 text-lg text-gray-600">
                                         <div class="flex items-center space-x-2">
                                             <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -26,8 +26,11 @@
             returnDate: '',
             selectedTime: '',
             selectedCompany: '',
+            returnTime: '',
+            returnCompany: '',
             passengerCount: 1,
             selectedSeats: [],
+            returnSeats: [],
             passengerInfo: [],
             totalAmount: 0
         };
@@ -539,9 +542,11 @@
         let isTransitioning = false;
 
         function updateProgress() {
-            const progress = (currentStep / 11) * 100;
+            const totalSteps = bookingData.ticketType === 'roundtrip' ? 13 : 11;
+            const progress = (currentStep / totalSteps) * 100;
             document.getElementById('progress-bar').style.width = progress + '%';
             document.getElementById('current-step-display').textContent = currentStep;
+            document.getElementById('total-steps-display').textContent = totalSteps;
             
             // Show/hide back button
             const backBtn = document.getElementById('back-btn');
@@ -565,10 +570,13 @@
                 
                 setTimeout(() => {
                     // Hide all steps
-                    for (let i = 1; i <= 11; i++) {
+                    const maxSteps = bookingData.ticketType === 'roundtrip' ? 13 : 11;
+                    for (let i = 1; i <= maxSteps; i++) {
                         const stepEl = document.getElementById(`step${i}`);
-                        stepEl.classList.add('hidden');
-                        stepEl.classList.remove('slide-out', 'slide-in-left', 'step-transition');
+                        if (stepEl) {
+                            stepEl.classList.add('hidden');
+                            stepEl.classList.remove('slide-out', 'slide-in-left', 'step-transition');
+                        }
                     }
                     
                     // Show target step with appropriate animation
@@ -587,8 +595,12 @@
                 }, 300);
             } else {
                 // First time showing (no current step)
-                for (let i = 1; i <= 11; i++) {
-                    document.getElementById(`step${i}`).classList.add('hidden');
+                const maxSteps = bookingData.ticketType === 'roundtrip' ? 13 : 11;
+                for (let i = 1; i <= maxSteps; i++) {
+                    const stepEl = document.getElementById(`step${i}`);
+                    if (stepEl) {
+                        stepEl.classList.add('hidden');
+                    }
                 }
                 
                 if (targetStepElement) {
@@ -604,10 +616,19 @@
 
         function goBack() {
             if (currentStep > 1 && !isTransitioning) {
-                const previousStep = currentStep - 1;
+                let previousStep = currentStep - 1;
+                
+                // Auto-skip logic for one-way tickets when going back
+                if (bookingData.ticketType === 'oneway') {
+                    if (previousStep === 10) { // Skip return seat selection
+                        previousStep = 9;
+                    } else if (previousStep === 8) { // Skip return time selection
+                        previousStep = 7;
+                    }
+                }
                 
                 // Clean up seat listener if going back from seat selection
-                if (currentStep === 8 && seatListener) {
+                if ((currentStep === 9 || currentStep === 10) && seatListener) {
                     seatListener();
                     seatListener = null;
                 }
@@ -625,11 +646,16 @@
                     } else if (previousStep === 7) {
                         loadTimeSlots();
                     } else if (previousStep === 8) {
+                        loadReturnTimeSlots();
+                    } else if (previousStep === 9) {
                         generateSeatMap();
                         listenToSeatChanges();
-                    } else if (previousStep === 9) {
-                        generatePassengerForms();
                     } else if (previousStep === 10) {
+                        generateReturnSeatMap();
+                        listenToReturnSeatChanges();
+                    } else if (previousStep === 11) {
+                        generatePassengerForms();
+                    } else if (previousStep === 12) {
                         calculateTotal();
                         setupPaymentUpload();
                     }
@@ -640,7 +666,18 @@
         function nextStep() {
             if (validateCurrentStep()) {
                 currentStep++;
-                if (currentStep <= 11) {
+                const maxSteps = bookingData.ticketType === 'roundtrip' ? 13 : 11;
+                
+                if (currentStep <= maxSteps) {
+                    // Auto-skip logic for one-way tickets
+                    if (bookingData.ticketType === 'oneway') {
+                        if (currentStep === 8) { // Skip return time selection
+                            currentStep = 9;
+                        } else if (currentStep === 10) { // Skip return seat selection
+                            currentStep = 11;
+                        }
+                    }
+                    
                     showStep(currentStep);
                     
                     // Special handling for certain steps
@@ -653,14 +690,19 @@
                     } else if (currentStep === 7) {
                         loadTimeSlots();
                     } else if (currentStep === 8) {
+                        loadReturnTimeSlots();
+                    } else if (currentStep === 9) {
                         generateSeatMap();
                         listenToSeatChanges();
-                    } else if (currentStep === 9) {
-                        generatePassengerForms();
                     } else if (currentStep === 10) {
+                        generateReturnSeatMap();
+                        listenToReturnSeatChanges();
+                    } else if (currentStep === 11) {
+                        generatePassengerForms();
+                    } else if (currentStep === 12) {
                         calculateTotal();
                         setupPaymentUpload();
-                    } else if (currentStep === 11) {
+                    } else if (currentStep === 13) {
                         generateTicket();
                     }
                 }
@@ -702,13 +744,27 @@
                     break;
                     
                 case 8:
+                    if (bookingData.ticketType === 'roundtrip' && !bookingData.returnTime) {
+                        showCustomAlert('กรุณาเลือกเวลาเดินทางกลับ', 'warning');
+                        return false;
+                    }
+                    break;
+                    
+                case 9:
                     if (bookingData.selectedSeats.length !== bookingData.passengerCount) {
                         showCustomAlert(`กรุณาเลือกที่นั่ง ${bookingData.passengerCount} ที่`, 'warning');
                         return false;
                     }
                     break;
                     
-                case 9:
+                case 10:
+                    if (bookingData.ticketType === 'roundtrip' && bookingData.returnSeats.length !== bookingData.passengerCount) {
+                        showCustomAlert(`กรุณาเลือกที่นั่งขากลับ ${bookingData.passengerCount} ที่`, 'warning');
+                        return false;
+                    }
+                    break;
+                    
+                case 11:
                     if (!validatePassengerForms()) {
                         return false;
                     }
@@ -1020,6 +1076,183 @@
             continueBtn.classList.remove('opacity-50', 'cursor-not-allowed');
         }
 
+        // Return Time Selection Functions
+        function loadReturnTimeSlots() {
+            const timeSlotsContainer = document.getElementById('return-time-slots');
+            
+            // Update summary with return route
+            updateReturnSelectionSummary();
+            
+            let slotsHTML = '';
+            
+            timeSlots.forEach(timeSlot => {
+                slotsHTML += `
+                    <div class="mb-4">
+                        <button onclick="selectReturnTimeSlot('${timeSlot.time}')" class="return-time-slot-btn w-full bg-white border-2 border-gray-200 rounded-lg p-4 hover:border-blue-500 hover:shadow-md transition-all cursor-pointer text-left">
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="text-xl font-bold text-gray-800">${timeSlot.time}</div>
+                                        <div class="text-sm text-gray-500">${timeSlot.companies.length} บริษัทให้เลือก</div>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-lg font-bold text-green-600">เริ่มต้น ฿${Math.min(...timeSlot.companies.map(c => c.price))}</div>
+                                    <div class="text-xs text-gray-500">ต่อคน</div>
+                                </div>
+                            </div>
+                        </button>
+                        
+                        <!-- Companies list (initially hidden) -->
+                        <div id="return-companies-${timeSlot.time.replace(':', '')}" class="return-companies-list hidden mt-3 ml-4 space-y-2">
+                `;
+                
+                timeSlot.companies.forEach(company => {
+                    slotsHTML += `
+                        <div onclick="selectReturnCompany('${timeSlot.time}', ${company.price}, '${company.name}')" class="return-company-option bg-gray-50 border-2 border-gray-200 rounded-lg p-4 hover:border-green-500 hover:bg-green-50 transition-all cursor-pointer">
+                            <!-- Header -->
+                            <div class="flex justify-between items-center mb-3">
+                                <div class="flex items-center space-x-3">
+                                    <img src="${company.logo}" alt="${company.name}" class="w-10 h-10 rounded-lg object-cover" onerror="this.src=''; this.alt='${company.name}'; this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    <div class="w-10 h-10 bg-green-100 rounded-lg items-center justify-center hidden">
+                                        <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M4 6h16v2H4zm0 5h16v6H4zm2 2h12v2H6z"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="font-semibold text-gray-800">${company.name}</div>
+                                        <div class="text-xs text-gray-500">${company.class}</div>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-xl font-bold text-green-600">฿${company.price}</div>
+                                    <div class="text-xs text-gray-500">ต่อคน</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Info Row -->
+                            <div class="flex justify-between items-center text-sm">
+                                <div class="flex items-center space-x-4">
+                                    <div class="flex items-center space-x-1">
+                                        <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
+                                        </svg>
+                                        <span class="text-gray-600">${company.rating}</span>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        </svg>
+                                        <span class="text-gray-800 font-bold">${company.available} ที่นั่ง</span>
+                                    </div>
+                                </div>
+                                <div class="text-gray-500">${company.duration}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                slotsHTML += `
+                        </div>
+                    </div>
+                `;
+            });
+            
+            timeSlotsContainer.innerHTML = slotsHTML;
+        }
+
+        function updateReturnSelectionSummary() {
+            // Update return route display
+            const returnRouteSummary = document.getElementById('return-route-summary');
+            if (returnRouteSummary) {
+                returnRouteSummary.textContent = `${bookingData.destinationProvince} → ${getPickupPointName(bookingData.pickupPoint)}`;
+            }
+            
+            // Update return date info
+            const returnDateInfo = document.getElementById('return-date-info');
+            if (returnDateInfo && bookingData.returnDate) {
+                returnDateInfo.textContent = new Date(bookingData.returnDate).toLocaleDateString('th-TH');
+            }
+        }
+
+        function selectReturnTimeSlot(time) {
+            // Hide all return company lists first
+            document.querySelectorAll('.return-companies-list').forEach(list => {
+                list.classList.add('hidden');
+            });
+            
+            // Remove selection from all return time slot buttons
+            document.querySelectorAll('.return-time-slot-btn').forEach(btn => {
+                btn.classList.remove('border-green-500', 'bg-green-50');
+            });
+            
+            // Highlight selected return time slot
+            event.target.classList.add('border-green-500', 'bg-green-50');
+            
+            // Show companies for selected return time
+            const companiesId = `return-companies-${time.replace(':', '')}`;
+            const companiesList = document.getElementById(companiesId);
+            if (companiesList) {
+                companiesList.classList.remove('hidden');
+                
+                // Scroll to companies list smoothly
+                setTimeout(() => {
+                    companiesList.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'nearest' 
+                    });
+                }, 100);
+            }
+            
+            // Reset return company selection
+            bookingData.returnTime = '';
+            bookingData.returnCompany = '';
+            bookingData.returnBasePrice = 0;
+            
+            // Update summary
+            document.getElementById('return-time-summary').textContent = 'ยังไม่เลือก';
+            document.getElementById('return-company-summary').textContent = 'ยังไม่เลือก';
+            document.getElementById('return-price-summary').textContent = '฿0';
+            
+            // Disable continue button
+            const continueBtn = document.getElementById('continue-step8');
+            continueBtn.disabled = true;
+            continueBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+
+        function selectReturnCompany(time, price, companyName) {
+            bookingData.returnTime = time;
+            bookingData.returnBasePrice = price;
+            bookingData.returnCompany = companyName;
+            
+            // Remove selection from all return company options
+            document.querySelectorAll('.return-company-option').forEach(option => {
+                option.classList.remove('border-green-500', 'bg-green-50');
+            });
+            
+            // Highlight selected return company
+            event.target.classList.add('border-green-500', 'bg-green-50');
+            
+            // Update summary
+            document.getElementById('return-time-summary').textContent = time;
+            document.getElementById('return-company-summary').textContent = companyName;
+            
+            // Calculate and update return price
+            const returnPrice = price * bookingData.passengerCount;
+            document.getElementById('return-price-summary').textContent = `฿${returnPrice.toLocaleString()}`;
+            
+            // Enable continue button
+            const continueBtn = document.getElementById('continue-step8');
+            continueBtn.disabled = false;
+            continueBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
         function changePassengerCount(delta) {
             const newCount = bookingData.passengerCount + delta;
             if (newCount >= 1 && newCount <= 4) {
@@ -1202,6 +1435,138 @@
             }
         }
 
+        // Return Seat Management
+        async function generateReturnSeatMap() {
+            const frontSeats = document.getElementById('return-front-seats');
+            const backSeats = document.getElementById('return-back-seats');
+            
+            document.getElementById('return-required-seats').textContent = bookingData.passengerCount;
+            
+            // Generate front zone seats (1-15)
+            let frontHTML = '';
+            for (let row = 0; row < 8; row++) {
+                frontHTML += '<div class="flex justify-between items-center mb-3">';
+                
+                // Left side seats (2 seats)
+                const leftSeat1 = (row * 2) + 1;
+                const leftSeat2 = (row * 2) + 2;
+                
+                // Only generate if seat number <= 15
+                if (leftSeat1 <= 15) {
+                    frontHTML += `
+                        <div class="flex space-x-3">
+                            <div class="seat available" data-return-seat="${leftSeat1}" onclick="toggleReturnSeat(${leftSeat1})">${leftSeat1}</div>
+                            ${leftSeat2 <= 15 ? `<div class="seat available" data-return-seat="${leftSeat2}" onclick="toggleReturnSeat(${leftSeat2})">${leftSeat2}</div>` : '<div class="w-11"></div>'}
+                        </div>
+                    `;
+                } else {
+                    frontHTML += '<div class="flex space-x-3"><div class="w-11"></div><div class="w-11"></div></div>';
+                }
+                
+                // Aisle space
+                frontHTML += '<div class="w-16 flex items-center justify-center text-xs text-gray-500 font-medium">ทางเดิน</div>';
+                
+                // Right side seats (2 seats)
+                const rightSeat1 = 16 + (row * 2);
+                const rightSeat2 = rightSeat1 + 1;
+                
+                // Only generate if seat number <= 30
+                if (rightSeat1 <= 30) {
+                    frontHTML += `
+                        <div class="flex space-x-3">
+                            <div class="seat available" data-return-seat="${rightSeat1}" onclick="toggleReturnSeat(${rightSeat1})">${rightSeat1}</div>
+                            ${rightSeat2 <= 30 ? `<div class="seat available" data-return-seat="${rightSeat2}" onclick="toggleReturnSeat(${rightSeat2})">${rightSeat2}</div>` : '<div class="w-11"></div>'}
+                        </div>
+                    `;
+                } else {
+                    frontHTML += '<div class="flex space-x-3"><div class="w-11"></div><div class="w-11"></div></div>';
+                }
+                
+                frontHTML += '</div>';
+            }
+            
+            frontSeats.innerHTML = frontHTML;
+            
+            // Hide back seats section since we only have 30 seats
+            backSeats.innerHTML = '';
+            
+            // Load occupied seats from Firebase for return trip
+            await loadReturnOccupiedSeats();
+        }
+
+        async function loadReturnOccupiedSeats() {
+            try {
+                // Simulate different occupied seats for return trip
+                const demoReturnOccupiedSeats = [2, 8, 14, 19, 26, 29];
+                
+                demoReturnOccupiedSeats.forEach(seatNumber => {
+                    const seatElement = document.querySelector(`[data-return-seat="${seatNumber}"]`);
+                    if (seatElement) {
+                        seatElement.classList.remove('available');
+                        seatElement.classList.add('occupied');
+                    }
+                });
+                
+                console.log('Demo return occupied seats loaded');
+            } catch (error) {
+                console.error('Error loading return occupied seats:', error);
+            }
+        }
+
+        function listenToReturnSeatChanges() {
+            // Demo mode - no real-time updates needed
+            console.log('Demo mode - real-time return seat updates disabled');
+        }
+
+        function toggleReturnSeat(seatNumber) {
+            const seatElement = document.querySelector(`[data-return-seat="${seatNumber}"]`);
+            
+            if (seatElement.classList.contains('occupied')) {
+                return;
+            }
+
+            const isSelected = seatElement.classList.contains('selected');
+            const maxSeats = bookingData.passengerCount;
+
+            if (isSelected) {
+                seatElement.classList.remove('selected');
+                seatElement.classList.add('available');
+                bookingData.returnSeats = bookingData.returnSeats.filter(seat => seat !== seatNumber);
+            } else {
+                if (bookingData.returnSeats.length < maxSeats) {
+                    seatElement.classList.remove('available');
+                    seatElement.classList.add('selected');
+                    bookingData.returnSeats.push(seatNumber);
+                } else {
+                    showCustomAlert(`สามารถเลือกได้สูงสุด ${maxSeats} ที่นั่ง`, 'warning');
+                    return;
+                }
+            }
+
+            updateReturnSeatDisplay();
+        }
+
+        function updateReturnSeatDisplay() {
+            const display = document.getElementById('return-selected-seats-display');
+            const confirmBtn = document.getElementById('confirm-return-seats-btn');
+            
+            if (bookingData.returnSeats.length === 0) {
+                display.textContent = 'ไม่มี';
+                display.className = 'font-semibold text-gray-500';
+            } else {
+                display.textContent = bookingData.returnSeats.sort((a, b) => a - b).join(', ');
+                display.className = 'font-semibold text-green-600';
+            }
+
+            if (bookingData.returnSeats.length === bookingData.passengerCount) {
+                confirmBtn.disabled = false;
+                confirmBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                confirmBtn.disabled = true;
+                confirmBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
         // Passenger Forms
         function generatePassengerForms() {
             const formsContainer = document.getElementById('passenger-forms');
@@ -1262,11 +1627,25 @@
 
         // Payment
         function calculateTotal() {
-            const baseAmount = bookingData.basePrice * bookingData.passengerCount;
-            const multiplier = bookingData.ticketType === 'roundtrip' ? 2 : 1;
-            bookingData.totalAmount = baseAmount * multiplier;
+            const departureAmount = bookingData.basePrice * bookingData.passengerCount;
+            const returnAmount = bookingData.ticketType === 'roundtrip' ? 
+                (bookingData.returnBasePrice * bookingData.passengerCount) : 0;
+            
+            bookingData.totalAmount = departureAmount + returnAmount;
             
             document.getElementById('total-amount').textContent = `฿${bookingData.totalAmount.toLocaleString()}`;
+            
+            // Update detailed breakdown if elements exist
+            const departurePriceEl = document.getElementById('departure-price');
+            const returnPriceEl = document.getElementById('return-price');
+            
+            if (departurePriceEl) {
+                departurePriceEl.textContent = `฿${departureAmount.toLocaleString()}`;
+            }
+            
+            if (returnPriceEl && bookingData.ticketType === 'roundtrip') {
+                returnPriceEl.textContent = `฿${returnAmount.toLocaleString()}`;
+            }
         }
 
         function setupPaymentUpload() {
@@ -1433,12 +1812,24 @@
                 returnTripInfo.classList.remove('hidden');
                 
                 document.getElementById('return-route-display').textContent = 
-                    `${bookingData.destinationProvince} → หมอชิต`;
+                    `${bookingData.destinationProvince} → ${getPickupPointName(bookingData.pickupPoint)}`;
                 
                 document.getElementById('return-date-display').textContent = 
                     formatThaiDate(bookingData.returnDate);
                 
-                document.getElementById('return-time-display').textContent = bookingData.selectedTime;
+                document.getElementById('return-time-display').textContent = bookingData.returnTime;
+                
+                // แสดงที่นั่งขากลับ
+                const returnSeatsDisplay = document.getElementById('return-seats-display');
+                if (returnSeatsDisplay) {
+                    returnSeatsDisplay.textContent = bookingData.returnSeats.join(', ');
+                }
+                
+                // แสดงบริษัทขากลับ
+                const returnCompanyDisplay = document.getElementById('return-company-display');
+                if (returnCompanyDisplay) {
+                    returnCompanyDisplay.textContent = bookingData.returnCompany;
+                }
             }
             
             // Set company name
@@ -1506,8 +1897,11 @@
                     returnDate: '',
                     selectedTime: '',
                     selectedCompany: '',
+                    returnTime: '',
+                    returnCompany: '',
                     passengerCount: 1,
                     selectedSeats: [],
+                    returnSeats: [],
                     passengerInfo: [],
                     totalAmount: 0
                 };
